@@ -174,22 +174,6 @@ export default function Home() {
         )}
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="flex-none border-t bg-white dark:bg-gray-800 py-6">
-        <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400 text-sm">
-          <p>
-            Built with Next.js, React, Drizzle ORM, PostgreSQL & Cloudflare R2
-          </p>
-          <p className="mt-1">
-            {hasUnsavedChanges && (
-              <span className="text-yellow-600 dark:text-yellow-400">
-                ● Unsaved changes - Auto-saving...
-              </span>
-            )}
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }
