@@ -49,7 +49,7 @@ export function LivePreview({ profileData }: LivePreviewProps) {
         >
           <ProfileCard profileData={profileData} />
           <LinksSection links={profileData.links} />
-          <HighlightsGrid highlights={profileData.highlights} />
+          <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={viewMode === 'mobile'} />
         </div>
       </ThemeApplier>
     </div>

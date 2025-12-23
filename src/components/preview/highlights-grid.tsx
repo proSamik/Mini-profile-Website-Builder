@@ -5,6 +5,7 @@ import { ExternalLink, Sparkles } from 'lucide-react';
 
 interface HighlightsGridProps {
   highlights: Highlight[];
+  forceSingleColumn?: boolean;
 }
 
 // Generate a gradient based on the index for variety
@@ -20,7 +21,7 @@ const getGradient = (index: number) => {
   return gradients[index % gradients.length];
 };
 
-export function HighlightsGrid({ highlights }: HighlightsGridProps) {
+export function HighlightsGrid({ highlights, forceSingleColumn = false }: HighlightsGridProps) {
   if (highlights.length === 0) return null;
 
   return (
@@ -28,7 +29,7 @@ export function HighlightsGrid({ highlights }: HighlightsGridProps) {
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
         Highlights
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className={`grid gap-6 ${forceSingleColumn ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
         {highlights.map((highlight, index) => {
           const CardWrapper = highlight.url ? 'a' : 'div';
           const cardProps = highlight.url
