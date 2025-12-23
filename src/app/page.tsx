@@ -5,7 +5,7 @@ import { useProfile } from '@/hooks/use-profile';
 import { UIEditor } from '@/components/editor/ui-editor';
 import { JSONEditor } from '@/components/editor/json-editor';
 import { LivePreview } from '@/components/preview/live-preview';
-import { Button, ThemeToggle } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { Code, Paintbrush, Save, Loader2 } from 'lucide-react';
 
 // For demo purposes, we'll use a hardcoded userId
@@ -53,9 +53,6 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap gap-2 items-center">
-              {/* Theme Toggle */}
-              <ThemeToggle />
-
               {/* View Mode Toggle */}
               <div className="flex gap-1 bg-muted rounded-lg p-1">
                 {(['split', 'editor', 'preview'] as const).map((mode) => (
