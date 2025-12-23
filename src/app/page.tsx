@@ -28,7 +28,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center overflow-hidden">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-900 dark:text-white" />
           <p className="text-gray-600 dark:text-gray-400">Loading your profile...</p>
@@ -38,9 +38,9 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="h-screen bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-white dark:bg-gray-800 shadow-sm">
+      <header className="flex-none z-50 border-b bg-white dark:bg-gray-800 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
@@ -123,11 +123,12 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="flex-1 overflow-y-auto">
+        <div className="container mx-auto px-4 py-8">
         {viewMode === 'split' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Editor Panel */}
-            <div className="max-h-[calc(100vh-180px)] overflow-y-auto pr-4 scrollbar-thin">
+            <div>
               {editorMode === 'ui' ? (
                 <UIEditor
                   profileData={profileData}
@@ -143,7 +144,7 @@ export default function Home() {
             </div>
 
             {/* Preview Panel */}
-            <div className="sticky top-[120px] max-h-[calc(100vh-180px)] overflow-y-auto">
+            <div>
               <LivePreview profileData={profileData} />
             </div>
           </div>
@@ -171,10 +172,11 @@ export default function Home() {
             <LivePreview profileData={profileData} />
           </div>
         )}
+        </div>
       </div>
 
       {/* Footer */}
-      <footer className="mt-16 border-t bg-white dark:bg-gray-800 py-6">
+      <footer className="flex-none border-t bg-white dark:bg-gray-800 py-6">
         <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400 text-sm">
           <p>
             Built with Next.js, React, Drizzle ORM, PostgreSQL & Cloudflare R2
