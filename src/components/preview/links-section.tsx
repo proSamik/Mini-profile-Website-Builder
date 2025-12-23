@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { Link } from '@/types/profile';
 import { ExternalLink } from 'lucide-react';
 
@@ -7,7 +8,7 @@ interface LinksSectionProps {
   links: Link[];
 }
 
-export function LinksSection({ links }: LinksSectionProps) {
+export const LinksSection = memo(function LinksSection({ links }: LinksSectionProps) {
   if (links.length === 0) return null;
 
   return (
@@ -28,4 +29,4 @@ export function LinksSection({ links }: LinksSectionProps) {
       </div>
     </div>
   );
-}
+});

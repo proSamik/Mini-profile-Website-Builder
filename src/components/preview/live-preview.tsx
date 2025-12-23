@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ProfileData } from '@/types/profile';
 import { ProfileCard } from './profile-card';
 import { LinksSection } from './links-section';
@@ -14,6 +14,14 @@ interface LivePreviewProps {
 
 export function LivePreview({ profileData }: LivePreviewProps) {
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+
+  const containerClassName = useMemo(
+    () =>
+      `mx-auto bg-background rounded-xl shadow-2xl overflow-hidden border border-border ${
+        viewMode === 'mobile' ? 'max-w-sm' : 'w-full'
+      }`,
+    [viewMode]
+  );
 
   return (
     <div className="space-y-4">
@@ -40,11 +48,7 @@ export function LivePreview({ profileData }: LivePreviewProps) {
         </div>
       </div>
 
-      <div
-        className={`transition-all duration-300 mx-auto bg-background rounded-xl shadow-2xl overflow-hidden border border-border ${
-          viewMode === 'mobile' ? 'max-w-sm' : 'w-full'
-        }`}
-      >
+      <div className={containerClassName}>
         <ProfileCard profileData={profileData} />
         <LinksSection links={profileData.links} />
         <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={viewMode === 'mobile'} />

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { Highlight } from '@/types/profile';
 import { ExternalLink, Sparkles } from 'lucide-react';
 
@@ -21,7 +22,7 @@ const getGradient = (index: number) => {
   return gradients[index % gradients.length];
 };
 
-export function HighlightsGrid({ highlights, forceSingleColumn = false }: HighlightsGridProps) {
+export const HighlightsGrid = memo(function HighlightsGrid({ highlights, forceSingleColumn = false }: HighlightsGridProps) {
   if (highlights.length === 0) return null;
 
   return (
@@ -96,4 +97,4 @@ export function HighlightsGrid({ highlights, forceSingleColumn = false }: Highli
       </div>
     </div>
   );
-}
+});

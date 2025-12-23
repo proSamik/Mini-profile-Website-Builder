@@ -1,12 +1,13 @@
 'use client';
 
+import { memo } from 'react';
 import { ProfileData } from '@/types/profile';
 
 interface ProfileCardProps {
   profileData: ProfileData;
 }
 
-export function ProfileCard({ profileData }: ProfileCardProps) {
+export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCardProps) {
   return (
     <div className="p-8 text-center border-b border-border">
       {/* Profile Photo */}
@@ -37,4 +38,4 @@ export function ProfileCard({ profileData }: ProfileCardProps) {
       </p>
     </div>
   );
-}
+});
