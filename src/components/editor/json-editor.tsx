@@ -101,7 +101,7 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
         <textarea
           value={jsonText}
           onChange={handleTextChange}
-          className="w-full h-[400px] p-3 font-mono text-sm border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-900 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100"
+          className="w-full h-[400px] p-3 font-mono text-sm border border-input-border rounded-lg bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           spellCheck={false}
           placeholder="Edit JSON to see live preview..."
         />
@@ -135,7 +135,7 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
           </Button>
         </div>
 
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+        <p className="text-xs text-muted-foreground mt-2 text-center">
           {isManualEdit ? '✨ Live preview active - changes update automatically' : '📝 Ready to edit'}
         </p>
       </CardContent>

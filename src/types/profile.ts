@@ -3,14 +3,6 @@ export interface ProfilePhoto {
   value: string;
 }
 
-export interface Theme {
-  layout: 'centered' | 'sidebar-left' | 'sidebar-right';
-  colorScheme: 'light' | 'dark' | 'custom';
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
-}
-
 export interface Link {
   id: string;
   label: string;
@@ -34,7 +26,6 @@ export interface ProfileData {
   displayName: string;
   bio: string;
   profilePhoto: ProfilePhoto;
-  theme: Theme;
   links: Link[];
   highlights: Highlight[];
 }

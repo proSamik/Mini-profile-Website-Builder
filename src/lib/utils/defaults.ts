@@ -10,13 +10,6 @@ export function getDefaultProfileData(): ProfileData {
       type: 'url',
       value: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=256&h=256&fit=crop',
     },
-    theme: {
-      layout: 'centered',
-      colorScheme: 'light',
-      primaryColor: '#000000',
-      secondaryColor: '#FFFFFF',
-      accentColor: '#374151',
-    },
     links: [
       {
         id: nanoid(),

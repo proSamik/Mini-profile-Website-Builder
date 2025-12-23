@@ -3,7 +3,7 @@ import { getProfileByUsername } from '@/lib/db/queries';
 import { ProfileCard } from '@/components/preview/profile-card';
 import { LinksSection } from '@/components/preview/links-section';
 import { HighlightsGrid } from '@/components/preview/highlights-grid';
-import { ThemeApplier } from '@/components/preview/theme-applier';
+import { ThemeToggle } from '@/components/ui';
 import { ProfileData } from '@/types/profile';
 
 interface PageProps {
@@ -24,15 +24,18 @@ export default async function ProfilePage({ params }: PageProps) {
   const profileData = profile.profileData as ProfileData;
 
   return (
-    <ThemeApplier theme={profileData.theme}>
-      <div className="min-h-screen bg-white dark:bg-gray-800">
-        <div className="max-w-4xl mx-auto">
-          <ProfileCard profileData={profileData} />
-          <LinksSection links={profileData.links} />
-          <HighlightsGrid highlights={profileData.highlights} />
-        </div>
+    <div className="min-h-screen bg-background">
+      {/* Theme Toggle */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
       </div>
-    </ThemeApplier>
+
+      <div className="max-w-4xl mx-auto">
+        <ProfileCard profileData={profileData} />
+        <LinksSection links={profileData.links} />
+        <HighlightsGrid highlights={profileData.highlights} />
+      </div>
+    </div>
   );
 }
 

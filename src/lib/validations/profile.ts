@@ -5,14 +5,6 @@ export const ProfilePhotoSchema = z.object({
   value: z.string().url(),
 });
 
-export const ThemeSchema = z.object({
-  layout: z.enum(['centered', 'sidebar-left', 'sidebar-right']),
-  colorScheme: z.enum(['light', 'dark', 'custom']),
-  primaryColor: z.string().regex(/^#[0-9A-F]{6}$/i, 'Invalid hex color'),
-  secondaryColor: z.string().regex(/^#[0-9A-F]{6}$/i, 'Invalid hex color'),
-  accentColor: z.string().regex(/^#[0-9A-F]{6}$/i, 'Invalid hex color'),
-});
-
 export const LinkSchema = z.object({
   id: z.string(),
   label: z.string().min(1).max(50),
@@ -40,7 +32,6 @@ export const ProfileDataSchema = z.object({
   displayName: z.string().min(1, 'Display name is required').max(50),
   bio: z.string().max(160, 'Bio must be at most 160 characters'),
   profilePhoto: ProfilePhotoSchema,
-  theme: ThemeSchema,
   links: z.array(LinkSchema),
   highlights: z.array(HighlightSchema),
 });

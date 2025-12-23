@@ -88,10 +88,10 @@ export function LinksManager({ profileData, onChange }: LinksManagerProps) {
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className={`space-y-2 ${snapshot.isDraggingOver ? 'bg-gray-50 dark:bg-gray-900/20' : ''}`}
+                className={`space-y-2 ${snapshot.isDraggingOver ? 'bg-muted' : ''}`}
               >
                 {profileData.links.length === 0 ? (
-                  <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">
+                  <p className="text-muted-foreground text-sm text-center py-4">
                     No links added yet
                   </p>
                 ) : (
@@ -101,12 +101,12 @@ export function LinksManager({ profileData, onChange }: LinksManagerProps) {
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className={`flex gap-2 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg ${
+                          className={`flex gap-2 p-3 bg-accent rounded-lg ${
                             snapshot.isDragging ? 'shadow-lg' : ''
                           }`}
                         >
                           <div {...provided.dragHandleProps} className="flex items-center">
-                            <GripVertical className="w-5 h-5 text-gray-400" />
+                            <GripVertical className="w-5 h-5 text-muted-foreground" />
                           </div>
 
                           <Input
@@ -170,7 +170,7 @@ function LinkForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg mb-4">
+    <form onSubmit={handleSubmit} className="p-4 bg-accent rounded-lg mb-4">
       <Input
         label="Label"
         value={label}
