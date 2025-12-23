@@ -4,16 +4,63 @@ import { useState } from 'react';
 import { nanoid } from 'nanoid';
 import { ProfileData, Highlight } from '@/types/profile';
 import { Card, CardHeader, CardTitle, CardContent, Input, Textarea, Button } from '@/components/ui';
-import { Plus, Trash2, GripVertical } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Upload } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 
 interface HighlightsManagerProps {
   profileData: ProfileData;
   onChange: (updates: Partial<ProfileData>) => void;
+  userId: string;
 }
 
-export function HighlightsManager({ profileData, onChange }: HighlightsManagerProps) {
+export function HighlightsManager({ profileData, onChange, userId }: HighlightsManagerProps) {
   const [showForm, setShowForm] = useState(false);
+  const [uploadingIds, setUploadingIds] = useState<Set<string>>(new Set());
+
+  const handleImageUpload = async (highlightId: string, file: File) => {
+    try {
+      setUploadingIds((prev) => new Set(prev).add(highlightId));
+
+      // Get presigned URL
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          fileName: file.name,
+          contentType: file.type,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get upload URL');
+      }
+
+      const { uploadUrl, publicUrl } = await response.json();
+
+      // Upload to R2
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      // Update highlight with new image URL
+      updateHighlight(highlightId, { image: publicUrl });
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload image');
+    } finally {
+      setUploadingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(highlightId);
+        return next;
+      });
+    }
+  };
 
   const addHighlight = (highlightData: Omit<Highlight, 'id' | 'displayOrder'>) => {
     const newHighlight: Highlight = {
@@ -74,6 +121,7 @@ export function HighlightsManager({ profileData, onChange }: HighlightsManagerPr
               setShowForm(false);
             }}
             onCancel={() => setShowForm(false)}
+            userId={userId}
           />
         )}
 
@@ -139,14 +187,51 @@ export function HighlightsManager({ profileData, onChange }: HighlightsManagerPr
                             rows={2}
                           />
 
-                          <Input
-                            value={highlight.image || ''}
-                            onChange={(e) =>
-                              updateHighlight(highlight.id, { image: e.target.value })
-                            }
-                            placeholder="Image URL (optional)"
-                            className="!mb-2"
-                          />
+                          <div className="space-y-2 mb-2">
+                            <Input
+                              value={highlight.image || ''}
+                              onChange={(e) =>
+                                updateHighlight(highlight.id, { image: e.target.value })
+                              }
+                              placeholder="Image URL (optional)"
+                              className="!mb-0"
+                            />
+                            <div className="flex gap-2 items-center">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleImageUpload(highlight.id, file);
+                                }}
+                                className="hidden"
+                                id={`image-upload-${highlight.id}`}
+                                disabled={uploadingIds.has(highlight.id)}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  document.getElementById(`image-upload-${highlight.id}`)?.click()
+                                }
+                                disabled={uploadingIds.has(highlight.id)}
+                              >
+                                <Upload className="w-4 h-4 mr-1" />
+                                {uploadingIds.has(highlight.id) ? 'Uploading...' : 'Upload Image'}
+                              </Button>
+                              {highlight.image && (
+                                <img
+                                  src={highlight.image}
+                                  alt={highlight.title}
+                                  className="w-12 h-12 object-cover rounded border border-gray-300 dark:border-gray-600"
+                                  onError={(e) => {
+                                    e.currentTarget.src = 'https://via.placeholder.com/48';
+                                  }}
+                                />
+                              )}
+                            </div>
+                          </div>
 
                           <Input
                             value={highlight.url || ''}
@@ -174,14 +259,57 @@ export function HighlightsManager({ profileData, onChange }: HighlightsManagerPr
 function HighlightForm({
   onSubmit,
   onCancel,
+  userId,
 }: {
   onSubmit: (highlight: Omit<Highlight, 'id' | 'displayOrder'>) => void;
   onCancel: () => void;
+  userId: string;
 }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('');
   const [url, setUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      setUploading(true);
+
+      // Get presigned URL
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          fileName: file.name,
+          contentType: file.type,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get upload URL');
+      }
+
+      const { uploadUrl, publicUrl } = await response.json();
+
+      // Upload to R2
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      setImage(publicUrl);
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -215,13 +343,49 @@ function HighlightForm({
         placeholder="Tell us about this highlight..."
         rows={3}
       />
-      <Input
-        label="Image URL"
-        type="url"
-        value={image}
-        onChange={(e) => setImage(e.target.value)}
-        placeholder="https://..."
-      />
+      <div className="space-y-2">
+        <Input
+          label="Image URL"
+          type="url"
+          value={image}
+          onChange={(e) => setImage(e.target.value)}
+          placeholder="https://..."
+          className="!mb-0"
+        />
+        <div className="flex gap-2 items-center">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleImageUpload(file);
+            }}
+            className="hidden"
+            id="form-image-upload"
+            disabled={uploading}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => document.getElementById('form-image-upload')?.click()}
+            disabled={uploading}
+          >
+            <Upload className="w-4 h-4 mr-1" />
+            {uploading ? 'Uploading...' : 'Upload Image'}
+          </Button>
+          {image && (
+            <img
+              src={image}
+              alt="Preview"
+              className="w-12 h-12 object-cover rounded border border-gray-300 dark:border-gray-600"
+              onError={(e) => {
+                e.currentTarget.src = 'https://via.placeholder.com/48';
+              }}
+            />
+          )}
+        </div>
+      </div>
       <Input
         label="Project URL"
         type="url"

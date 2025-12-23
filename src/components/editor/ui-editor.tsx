@@ -20,7 +20,7 @@ export function UIEditor({ profileData, onChange, userId }: UIEditorProps) {
       <PhotoUploader profileData={profileData} onChange={onChange} userId={userId} />
       <ThemeCustomizer profileData={profileData} onChange={onChange} />
       <LinksManager profileData={profileData} onChange={onChange} />
-      <HighlightsManager profileData={profileData} onChange={onChange} />
+      <HighlightsManager profileData={profileData} onChange={onChange} userId={userId} />
     </div>
   );
 }
