@@ -26,9 +26,11 @@ export default async function ProfilePage({ params }: PageProps) {
   return (
     <ThemeApplier theme={profileData.theme}>
       <div className="min-h-screen bg-white dark:bg-gray-800">
-        <ProfileCard profileData={profileData} />
-        <LinksSection links={profileData.links} />
-        <HighlightsGrid highlights={profileData.highlights} />
+        <div className="max-w-4xl mx-auto">
+          <ProfileCard profileData={profileData} />
+          <LinksSection links={profileData.links} />
+          <HighlightsGrid highlights={profileData.highlights} />
+        </div>
       </div>
     </ThemeApplier>
   );
