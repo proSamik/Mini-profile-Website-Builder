@@ -42,10 +42,11 @@ export async function updateProfile(userId: string, updates: { username?: string
   }
 
   if (updates.profileData) {
+    const currentData = existing[0].profileData as ProfileData;
     updateData.profileData = {
-      ...existing[0].profileData,
+      ...currentData,
       ...updates.profileData,
-    };
+    } as any;
   }
 
   const [updatedProfile] = await db
