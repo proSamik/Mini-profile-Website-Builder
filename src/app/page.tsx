@@ -1,65 +1,193 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { useProfile } from '@/hooks/use-profile';
+import { UIEditor } from '@/components/editor/ui-editor';
+import { JSONEditor } from '@/components/editor/json-editor';
+import { LivePreview } from '@/components/preview/live-preview';
+import { Button } from '@/components/ui';
+import { Code, Paintbrush, Save, Loader2 } from 'lucide-react';
+
+// For demo purposes, we'll use a hardcoded userId
+// In a real app, this would come from authentication
+const DEMO_USER_ID = 'demo-user-123';
 
 export default function Home() {
+  const [viewMode, setViewMode] = useState<'split' | 'editor' | 'preview'>('split');
+  const [editorMode, setEditorMode] = useState<'ui' | 'json'>('ui');
+
+  const {
+    profileData,
+    updateProfileData,
+    replaceProfileData,
+    saveProfile,
+    loading,
+    saving,
+    hasUnsavedChanges,
+  } = useProfile(DEMO_USER_ID);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-900 dark:text-white" />
+          <p className="text-gray-600 dark:text-gray-400">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b bg-white dark:bg-gray-800 shadow-sm">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Mini Profile Builder
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Design your personal profile website in real-time
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {/* View Mode Toggle */}
+              <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                {(['split', 'editor', 'preview'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className={`px-3 py-1.5 rounded-md capitalize text-sm font-medium transition-colors ${
+                      viewMode === mode
+                        ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+
+              {/* Editor Mode Toggle (only visible in editor/split view) */}
+              {(viewMode === 'split' || viewMode === 'editor') && (
+                <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                  <button
+                    onClick={() => setEditorMode('ui')}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
+                      editorMode === 'ui'
+                        ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <Paintbrush className="w-4 h-4" />
+                    UI
+                  </button>
+                  <button
+                    onClick={() => setEditorMode('json')}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
+                      editorMode === 'json'
+                        ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <Code className="w-4 h-4" />
+                    JSON
+                  </button>
+                </div>
+              )}
+
+              {/* Save Button */}
+              <Button
+                onClick={saveProfile}
+                disabled={saving || !hasUnsavedChanges}
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    {hasUnsavedChanges ? 'Save' : 'Saved'}
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        {viewMode === 'split' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Editor Panel */}
+            <div className="max-h-[calc(100vh-180px)] overflow-y-auto pr-4 scrollbar-thin">
+              {editorMode === 'ui' ? (
+                <UIEditor
+                  profileData={profileData}
+                  onChange={updateProfileData}
+                  userId={DEMO_USER_ID}
+                />
+              ) : (
+                <JSONEditor
+                  profileData={profileData}
+                  onChange={replaceProfileData}
+                />
+              )}
+            </div>
+
+            {/* Preview Panel */}
+            <div className="sticky top-[120px] max-h-[calc(100vh-180px)] overflow-y-auto">
+              <LivePreview profileData={profileData} />
+            </div>
+          </div>
+        )}
+
+        {viewMode === 'editor' && (
+          <div className="max-w-4xl mx-auto">
+            {editorMode === 'ui' ? (
+              <UIEditor
+                profileData={profileData}
+                onChange={updateProfileData}
+                userId={DEMO_USER_ID}
+              />
+            ) : (
+              <JSONEditor
+                profileData={profileData}
+                onChange={replaceProfileData}
+              />
+            )}
+          </div>
+        )}
+
+        {viewMode === 'preview' && (
+          <div className="max-w-4xl mx-auto">
+            <LivePreview profileData={profileData} />
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer className="mt-16 border-t bg-white dark:bg-gray-800 py-6">
+        <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400 text-sm">
+          <p>
+            Built with Next.js, React, Drizzle ORM, PostgreSQL & Cloudflare R2
+          </p>
+          <p className="mt-1">
+            {hasUnsavedChanges && (
+              <span className="text-yellow-600 dark:text-yellow-400">
+                ● Unsaved changes - Auto-saving...
+              </span>
+            )}
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </footer>
     </div>
   );
 }
