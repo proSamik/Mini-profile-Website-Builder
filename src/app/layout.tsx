@@ -29,16 +29,29 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                const root = document.documentElement;
-                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                root.classList.add(systemPrefersDark ? 'dark' : 'light');
+                try {
+                  const savedTheme = localStorage.getItem('theme') || 'system';
+                  const root = document.documentElement;
+                  
+                  // Remove any existing theme classes
+                  root.classList.remove('dark', 'light');
+                  
+                  if (savedTheme === 'dark') {
+                    root.classList.add('dark');
+                  } else if (savedTheme === 'light') {
+                    root.classList.add('light');
+                  } else if (savedTheme === 'system') {
+                    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    root.classList.add(systemPrefersDark ? 'dark' : 'light');
+                  }
+                } catch (e) {}
               })();
             `,
           }}
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
       >
         {children}
       </body>

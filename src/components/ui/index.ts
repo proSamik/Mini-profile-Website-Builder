@@ -9,3 +9,5 @@ export type { TextareaProps } from './textarea';
 
 export { Card, CardHeader, CardTitle, CardContent } from './card';
 export type { CardProps } from './card';
+
+export { ThemeToggle } from './theme-toggle';
