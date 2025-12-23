@@ -60,8 +60,8 @@ export default function Home() {
                     onClick={() => setEditorMode('ui')}
                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
                       editorMode === 'ui'
-                        ? 'bg-background text-foreground shadow-sm border border-border'
-                        : 'text-muted-foreground hover:text-foreground border border-transparent'
+                        ? 'bg-primary text-primary-foreground ring-1 ring-primary/50'
+                        : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <Paintbrush className="w-4 h-4" />
@@ -71,8 +71,8 @@ export default function Home() {
                     onClick={() => setEditorMode('json')}
                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
                       editorMode === 'json'
-                        ? 'bg-background text-foreground shadow-sm border border-border'
-                        : 'text-muted-foreground hover:text-foreground border border-transparent'
+                        ? 'bg-primary text-primary-foreground ring-1 ring-primary/50'
+                        : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     <Code className="w-4 h-4" />
@@ -89,8 +89,8 @@ export default function Home() {
                     onClick={() => setViewMode(mode)}
                     className={`px-3 py-1.5 rounded-md capitalize text-sm font-medium transition-colors ${
                       viewMode === mode
-                        ? 'bg-background text-foreground shadow-sm border border-border'
-                        : 'text-muted-foreground hover:text-foreground border border-transparent'
+                        ? 'bg-primary text-primary-foreground ring-1 ring-primary/50'
+                        : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     {mode}

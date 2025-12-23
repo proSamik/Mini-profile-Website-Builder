@@ -70,8 +70,8 @@ export function ThemeToggle() {
           onClick={() => handleThemeChange(buttonTheme)}
           className={`p-2 rounded-md transition-colors ${
             theme === buttonTheme
-              ? 'bg-background text-foreground shadow-sm border border-border'
-              : 'text-muted-foreground hover:text-foreground border border-transparent'
+              ? 'bg-primary text-primary-foreground ring-1 ring-primary/50'
+              : 'text-muted-foreground hover:text-foreground'
           }`}
           title={label}
           aria-label={label}
