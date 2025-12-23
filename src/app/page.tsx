@@ -53,35 +53,15 @@ export default function Home() {
             </div>
 
             <div className="flex flex-wrap gap-2 items-center">
-              {/* Theme Toggle */}
-              <ThemeToggle />
-
-              {/* View Mode Toggle */}
-              <div className="flex gap-1 bg-muted rounded-lg p-1">
-                {(['split', 'editor', 'preview'] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    onClick={() => setViewMode(mode)}
-                    className={`px-3 py-1.5 rounded-md capitalize text-sm font-medium transition-colors ${
-                      viewMode === mode
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {mode}
-                  </button>
-                ))}
-              </div>
-
               {/* Editor Mode Toggle (only visible in editor/split view) */}
               {(viewMode === 'split' || viewMode === 'editor') && (
-                <div className="flex gap-1 bg-muted rounded-lg p-1">
+                <div className="flex gap-1 bg-muted rounded-lg p-1 border border-border">
                   <button
                     onClick={() => setEditorMode('ui')}
                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
                       editorMode === 'ui'
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
+                        ? 'bg-background text-foreground shadow-sm border border-border'
+                        : 'text-muted-foreground hover:text-foreground border border-transparent'
                     }`}
                   >
                     <Paintbrush className="w-4 h-4" />
@@ -91,8 +71,8 @@ export default function Home() {
                     onClick={() => setEditorMode('json')}
                     className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
                       editorMode === 'json'
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground'
+                        ? 'bg-background text-foreground shadow-sm border border-border'
+                        : 'text-muted-foreground hover:text-foreground border border-transparent'
                     }`}
                   >
                     <Code className="w-4 h-4" />
@@ -100,6 +80,23 @@ export default function Home() {
                   </button>
                 </div>
               )}
+
+              {/* View Mode Toggle */}
+              <div className="flex gap-1 bg-muted rounded-lg p-1 border border-border">
+                {(['split', 'editor', 'preview'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className={`px-3 py-1.5 rounded-md capitalize text-sm font-medium transition-colors ${
+                      viewMode === mode
+                        ? 'bg-background text-foreground shadow-sm border border-border'
+                        : 'text-muted-foreground hover:text-foreground border border-transparent'
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
 
               {/* Save Button */}
               <Button
@@ -120,6 +117,9 @@ export default function Home() {
                   </>
                 )}
               </Button>
+
+              {/* Theme Toggle */}
+              <ThemeToggle />
             </div>
           </div>
         </div>

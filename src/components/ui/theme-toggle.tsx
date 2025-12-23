@@ -50,7 +50,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className="flex gap-1 p-1 bg-muted rounded-lg">
+      <div className="flex gap-1 p-1 bg-muted rounded-lg border border-border">
         <div className="w-8 h-8" />
       </div>
     );
@@ -63,15 +63,15 @@ export function ThemeToggle() {
   ];
 
   return (
-    <div className="flex gap-1 p-1 bg-muted rounded-lg">
+    <div className="flex gap-1 p-1 bg-muted rounded-lg border border-border">
       {buttons.map(({ theme: buttonTheme, icon: Icon, label }) => (
         <button
           key={buttonTheme}
           onClick={() => handleThemeChange(buttonTheme)}
           className={`p-2 rounded-md transition-colors ${
             theme === buttonTheme
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
+              ? 'bg-background text-foreground shadow-sm border border-border'
+              : 'text-muted-foreground hover:text-foreground border border-transparent'
           }`}
           title={label}
           aria-label={label}
