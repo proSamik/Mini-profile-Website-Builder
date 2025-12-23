@@ -9,14 +9,14 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'primary', size = 'md', className, ...props }, ref) => {
     const baseClasses =
-      'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+      'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variantClasses = {
-      primary: 'bg-foreground text-background hover:bg-foreground/90 focus:ring-ring',
-      secondary: 'bg-accent text-accent-foreground hover:bg-accent/90 focus:ring-ring',
-      danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-      outline: 'border-2 border-border bg-transparent text-foreground hover:bg-accent focus:ring-ring',
-      ghost: 'bg-transparent text-foreground hover:bg-accent',
+      primary: 'bg-foreground text-background hover:bg-foreground/90 font-semibold border-2 border-foreground',
+      secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90 border-2 border-secondary',
+      danger: 'bg-red-600 text-white hover:bg-red-700 border-2 border-red-600',
+      outline: 'border-2 border-transparent bg-transparent text-muted-foreground hover:text-foreground hover:border-border',
+      ghost: 'bg-transparent text-foreground hover:bg-accent border-2 border-transparent',
     };
 
     const sizeClasses = {
