@@ -39,12 +39,10 @@ export function PhotoUploader({ profileData, onChange, userId }: PhotoUploaderPr
       const { uploadUrl, publicUrl } = await response.json();
 
       // Upload to R2
+      // Note: Don't set Content-Type header - it's already included in the presigned URL
       const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
-        headers: {
-          'Content-Type': file.type,
-        },
       });
 
       if (!uploadResponse.ok) {

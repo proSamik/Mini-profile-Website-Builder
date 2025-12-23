@@ -37,7 +37,7 @@ A modern, real-time profile website builder built with Next.js, PostgreSQL, and 
 ### 1. Clone and Install
 
 ```bash
-git clone <your-repo-url>
+git clone git@github.com:proSamik/Mini-profile-Website-Builder.git
 cd Mini-profile-Website-Builder
 pnpm install
 ```
@@ -84,11 +84,41 @@ pnpm db:migrate
 
 ### 4. Cloudflare R2 Setup
 
-1. Create a Cloudflare account
-2. Create an R2 bucket
-3. Generate API tokens with read/write access
-4. Configure CORS for your bucket (allow PUT requests from your domain)
-5. Set up public access or use presigned URLs (implemented)
+1. Create a Cloudflare account and navigate to R2 Object Storage
+2. Create an R2 bucket (e.g., `profile-images`)
+3. Generate API tokens with read/write access:
+   - Go to R2 → Manage R2 API Tokens → Create API Token
+   - Save the Account ID, Access Key ID, and Secret Access Key
+4. **Configure CORS for your bucket** (required for browser uploads):
+   - In your R2 bucket settings, go to the **Settings** tab
+   - Add the following CORS policy:
+
+   ```json
+   [
+     {
+       "AllowedOrigins": [
+         "http://localhost:3000",
+         "https://your-production-domain.com"
+       ],
+       "AllowedMethods": [
+         "GET",
+         "PUT"
+       ],
+       "AllowedHeaders": [
+         "*"
+       ],
+       "ExposeHeaders": [],
+       "MaxAgeSeconds": 3600
+     }
+   ]
+   ```
+
+   **Note**: Replace `https://your-production-domain.com` with your actual domain. For development, `http://localhost:3000` is required.
+
+5. Set up public access for the bucket:
+   - Go to Settings → Public Access
+   - Enable "Allow Access" or use R2.dev subdomain
+   - Copy the public URL (e.g., `https://pub-xxxxx.r2.dev`) and use it as `R2_PUBLIC_URL`
 
 ### 5. Run Development Server
 
@@ -361,9 +391,15 @@ pnpm db:studio
 
 ### R2 Upload Issues
 
-- Verify CORS configuration
-- Check API token permissions
-- Ensure bucket is public or presigned URLs are enabled
+If you see "Failed to upload image" or "Failed to fetch" errors:
+
+1. **CORS not configured**: This is the most common issue. Make sure you've added the CORS policy to your R2 bucket (see Setup Instructions step 4)
+2. **Wrong origin in CORS**: Ensure `http://localhost:3000` is in AllowedOrigins for development
+3. **API token permissions**: Verify your API token has Object Read & Write permissions
+4. **Bucket not public**: Check that public access is enabled or R2.dev subdomain is configured
+5. **Wrong R2_PUBLIC_URL**: Ensure `R2_PUBLIC_URL` in `.env` matches your bucket's public URL
+
+To test CORS configuration, check browser console for specific CORS errors.
 
 ### Build Errors
 
