@@ -241,14 +241,18 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
                     onRemoveImage={removeImage}
                     onImageDragEnd={handleImageDragEnd}
                     onImageEdit={(imageData, existingImageUrl) => {
+                      console.log('onImageEdit called:', { imageData: imageData.substring(0, 20), existingImageUrl });
                       if (imageData === 'loading') {
                         // Show modal with loading state
+                        console.log('Setting modal to loading state');
                         setImageToCrop({ highlightId: highlight.id, imageData: '', existingImageUrl });
                       } else if (imageData === '') {
                         // Close modal
+                        console.log('Closing modal');
                         setImageToCrop(null);
                       } else {
                         // Update with actual image data
+                        console.log('Setting modal with image data');
                         setImageToCrop({ highlightId: highlight.id, imageData, existingImageUrl });
                       }
                     }}
@@ -475,13 +479,18 @@ function SortableImageItem({
           type="button"
           onClick={async (e) => {
             e.stopPropagation();
+            e.preventDefault();
+            
+            console.log('Edit button clicked for image:', imageUrl);
             
             // Open modal immediately with a loading placeholder
             onEdit('loading', imageUrl);
+            console.log('Modal should be open now');
             
             try {
               // Use proxy to avoid CORS issues
               const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+              console.log('Fetching image via proxy:', proxyUrl);
               const response = await fetch(proxyUrl);
               
               if (!response.ok) {
@@ -489,8 +498,10 @@ function SortableImageItem({
               }
               
               const blob = await response.blob();
+              console.log('Image blob received, size:', blob.size);
               const reader = new FileReader();
               reader.onload = () => {
+                console.log('Image converted to data URL, updating modal');
                 // Update the modal with the actual image data
                 onEdit(reader.result as string, imageUrl);
               };
@@ -505,7 +516,7 @@ function SortableImageItem({
               onEdit('', '');
             }
           }}
-          className="absolute inset-0 flex items-center justify-center bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute inset-0 flex items-center justify-center bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10"
         >
           <Edit className="w-5 h-5 text-white" />
         </button>
