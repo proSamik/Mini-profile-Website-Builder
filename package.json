@@ -13,30 +13,32 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "next": "16.1.1",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
     "@aws-sdk/client-s3": "^3.705.0",
     "@aws-sdk/s3-request-presigner": "^3.705.0",
+    "clsx": "^2.1.1",
     "drizzle-orm": "^0.37.0",
-    "postgres": "^3.4.5",
-    "zod": "^3.24.1",
-    "nanoid": "^5.0.9",
-    "react-beautiful-dnd": "^13.1.1",
+    "embla-carousel-react": "^8.6.0",
     "lucide-react": "^0.469.0",
-    "clsx": "^2.1.1"
+    "nanoid": "^5.0.9",
+    "next": "16.1.1",
+    "parse-favicon": "^7.0.2",
+    "postgres": "^3.4.5",
+    "react": "19.2.3",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-dom": "19.2.3",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
-    "@types/react-dom": "^19",
     "@types/react-beautiful-dnd": "^13.1.8",
+    "@types/react-dom": "^19",
+    "dotenv": "^16.4.7",
+    "drizzle-kit": "^0.30.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "drizzle-kit": "^0.30.0",
-    "dotenv": "^16.4.7"
+    "typescript": "^5"
   }
 }
