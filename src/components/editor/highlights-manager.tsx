@@ -34,7 +34,11 @@ interface HighlightsManagerProps {
 export function HighlightsManager({ profileData, onChange, userId }: HighlightsManagerProps) {
   const [showForm, setShowForm] = useState(false);
   const [uploadingIds, setUploadingIds] = useState<Set<string>>(new Set());
-  const [imageToCrop, setImageToCrop] = useState<{ highlightId: string; imageData: string } | null>(null);
+  const [imageToCrop, setImageToCrop] = useState<{ 
+    highlightId: string; 
+    imageData: string; 
+    existingImageUrl?: string; // Track if we're editing an existing image
+  } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -60,7 +64,7 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
     reader.readAsDataURL(file);
   };
 
-  const handleCropComplete = async (highlightId: string, croppedBlob: Blob) => {
+  const handleCropComplete = async (highlightId: string, croppedBlob: Blob, existingImageUrl?: string) => {
     try {
       setUploadingIds((prev) => new Set(prev).add(highlightId));
 
@@ -91,11 +95,20 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
         throw new Error('Failed to upload file');
       }
 
-      // Find the highlight and add the new image
+      // Find the highlight and update images
       const highlight = profileData.highlights.find((h) => h.id === highlightId);
       if (highlight) {
         const existingImages = highlight.images ?? [];
-        const newImages = [...existingImages, publicUrl];
+        let newImages: string[];
+        
+        if (existingImageUrl) {
+          // Replace the existing image
+          newImages = existingImages.map((img) => img === existingImageUrl ? publicUrl : img);
+        } else {
+          // Add new image
+          newImages = [...existingImages, publicUrl];
+        }
+        
         updateHighlight(highlightId, { images: newImages });
       }
 
@@ -227,6 +240,9 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
                     onFileSelect={handleFileSelect}
                     onRemoveImage={removeImage}
                     onImageDragEnd={handleImageDragEnd}
+                    onImageEdit={(imageData, existingImageUrl) => 
+                      setImageToCrop({ highlightId: highlight.id, imageData, existingImageUrl })
+                    }
                   />
                 ))
               )}
@@ -246,7 +262,7 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
       >
         <ImageCropper
           image={imageToCrop.imageData}
-          onCropComplete={(blob) => handleCropComplete(imageToCrop.highlightId, blob)}
+          onCropComplete={(blob) => handleCropComplete(imageToCrop.highlightId, blob, imageToCrop.existingImageUrl)}
           onCancel={() => setImageToCrop(null)}
           aspect={16 / 9}
           cropShape="rect"
@@ -265,6 +281,7 @@ function SortableHighlightItem({
   onFileSelect,
   onRemoveImage,
   onImageDragEnd,
+  onImageEdit,
 }: {
   highlight: Highlight;
   uploadingIds: Set<string>;
@@ -273,6 +290,7 @@ function SortableHighlightItem({
   onFileSelect: (highlightId: string, e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (highlightId: string, imageUrl: string) => void;
   onImageDragEnd: (highlightId: string, event: DragEndEvent) => void;
+  onImageEdit: (imageData: string, existingImageUrl: string) => void;
 }) {
   const {
     attributes,
@@ -374,9 +392,7 @@ function SortableHighlightItem({
                     imageUrl={imageUrl}
                     highlightTitle={highlight.title}
                     onRemove={() => onRemoveImage(highlight.id, imageUrl)}
-                    onEdit={(imageData) => {
-                      setImageToCrop({ highlightId: highlight.id, imageData });
-                    }}
+                    onEdit={(imageData) => onImageEdit(imageData, imageUrl)}
                   />
                 ))}
               </div>
