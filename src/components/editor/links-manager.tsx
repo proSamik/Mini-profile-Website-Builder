@@ -257,40 +257,45 @@ function SortableLinkItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex gap-2 p-3 bg-accent rounded-lg ${
+      className={`relative p-4 bg-accent rounded-lg border-2 border-border ${
         isDragging ? 'shadow-lg opacity-50 z-50' : ''
       }`}
     >
-      <div
-        {...attributes}
-        {...listeners}
-        className="flex items-center cursor-grab active:cursor-grabbing"
-      >
-        <GripVertical className="w-5 h-5 text-muted-foreground" />
-      </div>
-
-      <Input
-        value={link.label}
-        onChange={(e) => onUpdate(link.id, { label: e.target.value })}
-        placeholder="Label"
-        className="!mb-0 flex-1"
-      />
-
-      <Input
-        value={link.url}
-        onChange={(e) => onUpdate(link.id, { url: e.target.value })}
-        placeholder="URL"
-        className="!mb-0 flex-1"
-      />
-
-      <Button
-        size="sm"
-        variant="danger"
+      {/* Close button in top right */}
+      <button
+        type="button"
         onClick={() => onDelete(link.id)}
-        className="shrink-0"
+        className="absolute top-2 right-2 p-1.5 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors z-10"
       >
         <Trash2 className="w-4 h-4" />
-      </Button>
+      </button>
+
+      {/* Drag handle and inputs */}
+      <div className="flex gap-3 pr-10">
+        <div
+          {...attributes}
+          {...listeners}
+          className="flex items-center cursor-grab active:cursor-grabbing pt-2"
+        >
+          <GripVertical className="w-5 h-5 text-muted-foreground" />
+        </div>
+
+        <div className="flex-1 space-y-2">
+          <Input
+            value={link.label}
+            onChange={(e) => onUpdate(link.id, { label: e.target.value })}
+            placeholder="Label"
+            className="!mb-0"
+          />
+
+          <Input
+            value={link.url}
+            onChange={(e) => onUpdate(link.id, { url: e.target.value })}
+            placeholder="URL"
+            className="!mb-0"
+          />
+        </div>
+      </div>
     </div>
   );
 }

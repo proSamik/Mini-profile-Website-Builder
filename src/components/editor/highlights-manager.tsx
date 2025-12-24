@@ -332,15 +332,25 @@ function SortableHighlightItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`p-3 bg-accent rounded-lg ${
+      className={`relative p-4 bg-accent rounded-lg border-2 border-border ${
         isDragging ? 'shadow-lg opacity-50 z-50' : ''
       }`}
     >
-      <div className="flex gap-2 mb-2 items-center">
+      {/* Close button in top right */}
+      <button
+        type="button"
+        onClick={() => onDelete(highlight.id)}
+        className="absolute top-2 right-2 p-1.5 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors z-10"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+
+      {/* Drag handle and title */}
+      <div className="flex gap-3 mb-3 pr-10">
         <div
           {...attributes}
           {...listeners}
-          className="flex items-center cursor-grab active:cursor-grabbing self-stretch"
+          className="flex items-center cursor-grab active:cursor-grabbing pt-2"
         >
           <GripVertical className="w-5 h-5 text-muted-foreground" />
         </div>
@@ -351,80 +361,76 @@ function SortableHighlightItem({
           placeholder="Title"
           className="!mb-0 flex-1"
         />
-
-        <Button
-          size="sm"
-          variant="danger"
-          onClick={() => onDelete(highlight.id)}
-          className="shrink-0 self-center"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
       </div>
 
-      <Textarea
-        value={highlight.description || ''}
-        onChange={(e) => onUpdate(highlight.id, { description: e.target.value })}
-        placeholder="Description"
-        className="!mb-2"
-        rows={2}
-      />
-
-      <div className="space-y-2 mb-2">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => onFileSelect(highlight.id, e)}
-          className="hidden"
-          id={`image-upload-${highlight.id}`}
-          disabled={uploadingIds.has(highlight.id)}
+      <div className="pl-8">
+        <Textarea
+          value={highlight.description || ''}
+          onChange={(e) => onUpdate(highlight.id, { description: e.target.value })}
+          placeholder="Description"
+          className="!mb-3"
+          rows={2}
         />
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            document.getElementById(`image-upload-${highlight.id}`)?.click()
-          }
-          disabled={uploadingIds.has(highlight.id)}
-        >
-          <Upload className="w-4 h-4 mr-1" />
-          {uploadingIds.has(highlight.id) ? 'Uploading...' : 'Upload Image'}
-        </Button>
 
-        {/* Display uploaded images with drag-and-drop reordering */}
-        {highlight.images && highlight.images.length > 0 && (
-          <DndContext
-            sensors={[useSensor(PointerSensor)]}
-            collisionDetection={closestCenter}
-            onDragEnd={(event) => onImageDragEnd(highlight.id, event)}
+        <div className="space-y-2 mb-3">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => onFileSelect(highlight.id, e)}
+            className="hidden"
+            id={`image-upload-${highlight.id}`}
+            disabled={uploadingIds.has(highlight.id)}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              document.getElementById(`image-upload-${highlight.id}`)?.click()
+            }
+            disabled={uploadingIds.has(highlight.id)}
           >
-            <SortableContext
-              items={highlight.images}
-              strategy={horizontalListSortingStrategy}
-            >
-              <div className="flex gap-2 flex-wrap mt-2">
-                {highlight.images.map((imageUrl) => (
-                  <SortableImageItem
-                    key={imageUrl}
-                    imageUrl={imageUrl}
-                    highlightTitle={highlight.title}
-                    onRemove={() => onRemoveImage(highlight.id, imageUrl)}
-                    onEdit={(imageData, existingUrl) => onImageEdit(imageData, existingUrl)}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
-        )}
-      </div>
+            <Upload className="w-4 h-4 mr-1" />
+            {uploadingIds.has(highlight.id) ? 'Uploading...' : 'Upload Image'}
+          </Button>
 
-      <Input
-        value={highlight.url || ''}
-        onChange={(e) => onUpdate(highlight.id, { url: e.target.value })}
-        placeholder="Project URL (optional)"
-        className="!mb-0"
-      />
+          {/* Display uploaded images with drag-and-drop reordering */}
+          {highlight.images && highlight.images.length > 0 && (
+            <DndContext
+              sensors={[useSensor(PointerSensor)]}
+              collisionDetection={closestCenter}
+              onDragEnd={(event) => onImageDragEnd(highlight.id, event)}
+            >
+              <SortableContext
+                items={highlight.images}
+                strategy={horizontalListSortingStrategy}
+              >
+                <div className="flex gap-2 flex-wrap mt-2">
+                  {highlight.images.map((imageUrl) => (
+                    <SortableImageItem
+                      key={imageUrl}
+                      imageUrl={imageUrl}
+                      highlightTitle={highlight.title}
+                      onRemove={() => onRemoveImage(highlight.id, imageUrl)}
+                      onEdit={(imageData, existingUrl) => {
+                        console.log('SortableImageItem onEdit called');
+                        onImageEdit(imageData, existingUrl);
+                      }}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+        </div>
+
+        <Input
+          value={highlight.url || ''}
+          onChange={(e) => onUpdate(highlight.id, { url: e.target.value })}
+          placeholder="Project URL (optional)"
+          className="!mb-0"
+        />
+      </div>
     </div>
   );
 }
