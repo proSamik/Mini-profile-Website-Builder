@@ -31,7 +31,9 @@ export function ProfileMarqueeBackground() {
         className="flex-shrink-0 w-64"
       >
         <div className={cn(
-          "glass-card rounded-2xl p-6 transition-all duration-300"
+          "rounded-2xl p-6 transition-all duration-300",
+          "bg-card/80 backdrop-blur-xl border border-border/50",
+          "hover:bg-card/90 hover:shadow-glow-purple hover:scale-105"
         )}>
           <div className="flex items-center gap-4">
             {data.profilePhoto.type === 'url' ? (

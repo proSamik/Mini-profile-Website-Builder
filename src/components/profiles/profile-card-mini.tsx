@@ -11,7 +11,7 @@ export function ProfileCardMini({ profile }: ProfileCardMiniProps) {
 
   return (
     <Link href={`/${profile.username}`}>
-      <div className="glass-card rounded-2xl p-6 hover:shadow-glow-purple hover:scale-[1.02] transition-all duration-300 h-full">
+      <div className="rounded-2xl p-6 transition-all duration-300 h-full bg-card/80 backdrop-blur-xl border border-border/50 hover:bg-card/90 hover:shadow-glow-purple hover:scale-[1.02]">
         <div className="flex items-center gap-4 mb-4">
           <div className="w-16 h-16 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
             {data.profilePhoto.type === 'placeholder'
