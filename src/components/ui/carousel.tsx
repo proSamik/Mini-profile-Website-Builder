@@ -81,10 +81,10 @@ export function Carousel({ images, alt }: CarouselProps) {
             e.stopPropagation();
             scrollPrev();
           }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-black/90 text-foreground rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
           aria-label="Previous image"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-4 h-4 text-black" />
         </button>
       )}
 
@@ -95,15 +95,15 @@ export function Carousel({ images, alt }: CarouselProps) {
             e.stopPropagation();
             scrollNext();
           }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 dark:bg-black/90 text-foreground rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white rounded-full p-1.5 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
           aria-label="Next image"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-4 h-4 text-black" />
         </button>
       )}
 
       {/* Dots Indicator */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
         {images.map((_, index) => (
           <button
             key={index}
@@ -112,10 +112,10 @@ export function Carousel({ images, alt }: CarouselProps) {
               e.stopPropagation();
               emblaApi?.scrollTo(index);
             }}
-            className={`w-2 h-2 rounded-full transition-all ${
+            className={`rounded-full transition-all ${
               index === selectedIndex
-                ? 'bg-white w-6'
-                : 'bg-white/50 hover:bg-white/75'
+                ? 'bg-white w-4 h-1.5'
+                : 'bg-white/60 hover:bg-white/80 w-1.5 h-1.5'
             }`}
             aria-label={`Go to image ${index + 1}`}
           />
