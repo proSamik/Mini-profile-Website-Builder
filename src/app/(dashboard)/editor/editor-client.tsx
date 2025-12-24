@@ -17,6 +17,7 @@ interface EditorClientProps {
 export function EditorClient({ userId }: EditorClientProps) {
   const [viewMode, setViewMode] = useState<'split' | 'editor' | 'preview'>('split');
   const [editorMode, setEditorMode] = useState<'ui' | 'json'>('ui');
+  const [isUsernameValid, setIsUsernameValid] = useState(true);
 
   const {
     profileData,
@@ -102,9 +103,10 @@ export function EditorClient({ userId }: EditorClientProps) {
               {/* Save Button */}
               <Button
                 onClick={saveProfile}
-                disabled={saving || !hasUnsavedChanges}
+                disabled={saving || !hasUnsavedChanges || !isUsernameValid}
                 size="sm"
                 className="flex items-center gap-2"
+                title={!isUsernameValid ? 'Username is invalid or already taken' : undefined}
               >
                 {saving ? (
                   <>
@@ -149,11 +151,14 @@ export function EditorClient({ userId }: EditorClientProps) {
                     profileData={profileData}
                     onChange={updateProfileData}
                     userId={userId}
+                    onUsernameValidChange={setIsUsernameValid}
                   />
                 ) : (
                   <JSONEditor
                     profileData={profileData}
                     onChange={replaceProfileData}
+                    userId={userId}
+                    onUsernameValidChange={setIsUsernameValid}
                   />
                 )}
               </div>
@@ -172,11 +177,14 @@ export function EditorClient({ userId }: EditorClientProps) {
                   profileData={profileData}
                   onChange={updateProfileData}
                   userId={userId}
+                  onUsernameValidChange={setIsUsernameValid}
                 />
               ) : (
                 <JSONEditor
                   profileData={profileData}
                   onChange={replaceProfileData}
+                  userId={userId}
+                  onUsernameValidChange={setIsUsernameValid}
                 />
               )}
             </div>

@@ -3,19 +3,25 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ProfileData } from '@/types/profile';
 import { Card, CardHeader, CardTitle, CardContent, Button } from '@/components/ui';
-import { Copy, Download, Upload, Check, AlertCircle } from 'lucide-react';
+import { Copy, Download, Upload, Check, AlertCircle, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
 interface JSONEditorProps {
   profileData: ProfileData;
   onChange: (updates: ProfileData) => void;
+  userId: string;
+  onUsernameValidChange?: (isValid: boolean) => void;
 }
 
-export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
+export function JSONEditor({ profileData, onChange, userId, onUsernameValidChange }: JSONEditorProps) {
   const [jsonText, setJsonText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [errorLine, setErrorLine] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
   const [isManualEdit, setIsManualEdit] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(true);
+  const [originalUsername] = useState(profileData.username);
+  const [parsedUsername, setParsedUsername] = useState<string | null>(null);
 
   // Sync jsonText with profileData only when not manually editing
   useEffect(() => {
@@ -31,6 +37,7 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
     const timeout = setTimeout(() => {
       try {
         const parsed = JSON.parse(jsonText);
+        setParsedUsername(parsed.username);
         onChange(parsed);
         setError(null);
         setErrorLine(null);
@@ -52,6 +59,46 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
     return () => clearTimeout(timeout);
   }, [jsonText, isManualEdit, onChange]);
 
+  // Validate username from parsed JSON
+  useEffect(() => {
+    if (!parsedUsername) return;
+
+    const username = parsedUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    if (username.length < 3) {
+      setUsernameAvailable(false);
+      onUsernameValidChange?.(false);
+      return;
+    }
+
+    // If username hasn't changed, it's valid
+    if (username === originalUsername) {
+      setUsernameAvailable(true);
+      onUsernameValidChange?.(true);
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      setChecking(true);
+      try {
+        const res = await fetch(
+          `/api/profiles/check-username?username=${encodeURIComponent(username)}`
+        );
+        const data = await res.json();
+        setUsernameAvailable(data.available);
+        onUsernameValidChange?.(data.available);
+      } catch (error) {
+        console.error('Error checking username:', error);
+        setUsernameAvailable(false);
+        onUsernameValidChange?.(false);
+      } finally {
+        setChecking(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [parsedUsername, originalUsername, onUsernameValidChange]);
+
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     // Replace smart quotes with regular quotes
     let value = e.target.value;
@@ -67,6 +114,7 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
   const handleLoad = () => {
     try {
       const parsed = JSON.parse(jsonText);
+      setParsedUsername(parsed.username);
       onChange(parsed);
       setError(null);
       setErrorLine(null);
@@ -113,7 +161,20 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>JSON Data</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          JSON Data
+          {parsedUsername && parsedUsername.length >= 3 && (
+            <div className="flex items-center gap-1">
+              {checking && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+              {!checking && usernameAvailable === true && (
+                <CheckCircle2 className="w-4 h-4 text-green-500" title="Username available" />
+              )}
+              {!checking && usernameAvailable === false && (
+                <XCircle className="w-4 h-4 text-red-500" title="Username already taken" />
+              )}
+            </div>
+          )}
+        </CardTitle>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={handleCopy}>
             {copied ? <Check className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
@@ -149,6 +210,16 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
                   Check line <span className="font-bold">{errorLine}</span> in the editor above
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {!error && usernameAvailable === false && parsedUsername && parsedUsername.length >= 3 && (
+          <div className="flex items-start gap-2 text-red-500 text-sm mt-2 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-900">
+            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            <div>
+              <div className="font-semibold">Username Unavailable</div>
+              <div className="mt-1">The username "{parsedUsername}" is already taken</div>
             </div>
           </div>
         )}
