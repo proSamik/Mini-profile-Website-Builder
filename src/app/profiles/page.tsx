@@ -17,7 +17,7 @@ export default async function ProfilesPage() {
             Discover amazing people and their stories
           </p>
           <Link href="/">
-            <Button variant="gradient">Create Your Profile</Button>
+            <Button variant="primary">Create Your Profile</Button>
           </Link>
         </div>
 
