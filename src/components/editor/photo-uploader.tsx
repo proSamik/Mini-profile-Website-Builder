@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { ProfileData } from '@/types/profile';
-import { Card, CardHeader, CardTitle, CardContent, Input, Button } from '@/components/ui';
-import { Upload } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent, Button, Modal, Input } from '@/components/ui';
+import { ImageCropper } from '@/components/ui/image-cropper';
+import { Edit, Upload, Trash2 } from 'lucide-react';
 
 interface PhotoUploaderProps {
   profileData: ProfileData;
@@ -12,12 +13,45 @@ interface PhotoUploaderProps {
 }
 
 export function PhotoUploader({ profileData, onChange, userId }: PhotoUploaderProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const getGradient = () => {
+    const gradients = [
+      'from-purple-400 via-pink-500 to-red-500',
+      'from-blue-400 via-cyan-500 to-teal-500',
+      'from-orange-400 via-red-500 to-pink-500',
+      'from-green-400 via-emerald-500 to-cyan-500',
+      'from-indigo-400 via-purple-500 to-pink-500',
+      'from-yellow-400 via-orange-500 to-red-500',
+    ];
+    const index = profileData.displayName.charCodeAt(0) % gradients.length;
+    return gradients[index];
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageToCrop(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
     try {
       setUploading(true);
 
@@ -27,8 +61,8 @@ export function PhotoUploader({ profileData, onChange, userId }: PhotoUploaderPr
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
-          fileName: file.name,
-          contentType: file.type,
+          fileName: `profile-${Date.now()}.jpg`,
+          contentType: 'image/jpeg',
         }),
       });
 
@@ -39,10 +73,9 @@ export function PhotoUploader({ profileData, onChange, userId }: PhotoUploaderPr
       const { uploadUrl, publicUrl } = await response.json();
 
       // Upload to R2
-      // Note: Don't set Content-Type header - it's already included in the presigned URL
       const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
-        body: file,
+        body: croppedBlob,
       });
 
       if (!uploadResponse.ok) {
@@ -56,6 +89,8 @@ export function PhotoUploader({ profileData, onChange, userId }: PhotoUploaderPr
           value: publicUrl,
         },
       });
+      setImageToCrop(null);
+      setIsModalOpen(false);
     } catch (error) {
       console.error('Upload error:', error);
       alert('Failed to upload image');
@@ -64,68 +99,191 @@ export function PhotoUploader({ profileData, onChange, userId }: PhotoUploaderPr
     }
   };
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Profile Photo</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex gap-4 items-start">
-          <div className="flex-1">
-            <Input
-              label="Photo URL"
-              type="url"
-              value={profileData.profilePhoto.value}
-              onChange={(e) =>
-                onChange({
-                  profilePhoto: {
-                    type: 'url',
-                    value: e.target.value,
-                  },
-                })
-              }
-              placeholder="https://example.com/photo.jpg"
-            />
+  const handleUrlSubmit = () => {
+    if (photoUrl) {
+      onChange({
+        profilePhoto: {
+          type: 'url',
+          value: photoUrl,
+        },
+      });
+      setPhotoUrl('');
+      setIsModalOpen(false);
+    }
+  };
 
-            <div className="mt-2">
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Or upload an image
-              </label>
-              <div className="flex gap-2">
+  const handleRemovePhoto = () => {
+    onChange({
+      profilePhoto: {
+        type: 'placeholder',
+        value: '',
+      },
+    });
+    setIsModalOpen(false);
+  };
+
+  const hasPhoto = profileData.profilePhoto.value && profileData.profilePhoto.type !== 'placeholder';
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile Photo</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center gap-4">
+            {/* Profile Photo Display */}
+            <div className="relative w-32 h-32 flex-shrink-0">
+              {hasPhoto ? (
+                <img
+                  src={profileData.profilePhoto.value}
+                  alt="Profile"
+                  className="w-full h-full rounded-full object-cover border-4 border-gray-200 dark:border-gray-700"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      const initials = getInitials(profileData.displayName);
+                      const gradient = getGradient();
+                      parent.innerHTML = `<div class="w-full h-full rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center border-4 border-gray-200 dark:border-gray-700"><span class="text-white text-3xl font-bold">${initials}</span></div>`;
+                    }
+                  }}
+                />
+              ) : (
+                <div
+                  className={`w-full h-full rounded-full bg-gradient-to-br ${getGradient()} flex items-center justify-center border-4 border-gray-200 dark:border-gray-700`}
+                >
+                  <span className="text-white text-3xl font-bold">
+                    {getInitials(profileData.displayName)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Edit Button */}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Photo
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setImageToCrop(null);
+        }}
+        title="Edit Profile Photo"
+        size="md"
+      >
+        <div className="space-y-6">
+          {imageToCrop ? (
+            <ImageCropper
+              image={imageToCrop}
+              onCropComplete={handleCropComplete}
+              onCancel={() => setImageToCrop(null)}
+            />
+          ) : (
+            <>
+          {/* Current Photo Preview */}
+          <div className="flex justify-center">
+            <div className="relative w-32 h-32">
+              {hasPhoto ? (
+                <img
+                  src={profileData.profilePhoto.value}
+                  alt="Profile"
+                  className="w-full h-full rounded-full object-cover border-4 border-gray-200 dark:border-gray-700"
+                />
+              ) : (
+                <div
+                  className={`w-full h-full rounded-full bg-gradient-to-br ${getGradient()} flex items-center justify-center border-4 border-gray-200 dark:border-gray-700`}
+                >
+                  <span className="text-white text-3xl font-bold">
+                    {getInitials(profileData.displayName)}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+              {/* Upload from System */}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Upload from System
+                </label>
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={handleFileUpload}
+                  onChange={handleFileSelect}
                   className="hidden"
-                  id="photo-upload"
+                  id="photo-upload-modal"
                   disabled={uploading}
                 />
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
-                  onClick={() => document.getElementById('photo-upload')?.click()}
+                  size="md"
+                  onClick={() => document.getElementById('photo-upload-modal')?.click()}
                   disabled={uploading}
+                  className="w-full"
                 >
                   <Upload className="w-4 h-4 mr-2" />
-                  {uploading ? 'Uploading...' : 'Upload Image'}
+                  Choose File
                 </Button>
               </div>
+
+          {/* Or Use URL */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Or Use Image URL
+            </label>
+            <div className="flex gap-2">
+              <Input
+                type="url"
+                value={photoUrl}
+                onChange={(e) => setPhotoUrl(e.target.value)}
+                placeholder="https://example.com/photo.jpg"
+                className="!mb-0"
+              />
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={handleUrlSubmit}
+                disabled={!photoUrl}
+              >
+                Save
+              </Button>
             </div>
           </div>
 
-          <div className="w-24 h-24 flex-shrink-0">
-            <img
-              src={profileData.profilePhoto.value}
-              alt="Profile"
-              className="w-full h-full rounded-full object-cover border-4 border-gray-200 dark:border-gray-700"
-              onError={(e) => {
-                e.currentTarget.src = 'https://via.placeholder.com/100';
-              }}
-            />
-          </div>
+              {/* Remove Photo */}
+              {hasPhoto && (
+                <div className="pt-4 border-t border-border">
+                  <Button
+                    type="button"
+                    variant="danger"
+                    size="md"
+                    onClick={handleRemovePhoto}
+                    className="w-full"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Remove Photo
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
         </div>
-      </CardContent>
-    </Card>
+      </Modal>
+    </>
   );
 }

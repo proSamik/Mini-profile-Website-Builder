@@ -9,13 +9,15 @@ export interface Link {
   url: string;
   icon: string;
   displayOrder: number;
+  favicon?: string;
 }
 
 export interface Highlight {
   id: string;
   title: string;
   description?: string;
-  image?: string;
+  image?: string; // Keep for backward compatibility
+  images?: string[]; // New: support multiple images
   url?: string;
   displayOrder: number;
   category?: string;

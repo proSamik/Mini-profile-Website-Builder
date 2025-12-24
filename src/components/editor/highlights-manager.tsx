@@ -17,48 +17,79 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
   const [showForm, setShowForm] = useState(false);
   const [uploadingIds, setUploadingIds] = useState<Set<string>>(new Set());
 
-  const handleImageUpload = async (highlightId: string, file: File) => {
+  // Sort highlights by displayOrder
+  const sortedHighlights = [...profileData.highlights].sort((a, b) => a.displayOrder - b.displayOrder);
+
+  const handleImageUpload = async (highlightId: string, files: FileList) => {
     try {
       setUploadingIds((prev) => new Set(prev).add(highlightId));
 
-      // Get presigned URL
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          fileName: file.name,
-          contentType: file.type,
-        }),
+      const uploadPromises = Array.from(files).map(async (file) => {
+        // Get presigned URL
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            fileName: file.name,
+            contentType: file.type,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get upload URL');
+        }
+
+        const { uploadUrl, publicUrl } = await response.json();
+
+        // Upload to R2
+        const uploadResponse = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: file,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload file');
+        }
+
+        return publicUrl;
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to get upload URL');
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      // Find the highlight and add the new images
+      const highlight = profileData.highlights.find((h) => h.id === highlightId);
+      if (highlight) {
+        const existingImages = highlight.images ?? [];
+        updateHighlight(highlightId, { images: [...existingImages, ...uploadedUrls] });
       }
-
-      const { uploadUrl, publicUrl } = await response.json();
-
-      // Upload to R2
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: file,
-      });
-
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload file');
-      }
-
-      // Update highlight with new image URL
-      updateHighlight(highlightId, { image: publicUrl });
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Failed to upload image');
+      alert('Failed to upload image(s)');
     } finally {
       setUploadingIds((prev) => {
         const next = new Set(prev);
         next.delete(highlightId);
         return next;
       });
+    }
+  };
+
+  const removeImage = (highlightId: string, imageUrl: string) => {
+    const highlight = profileData.highlights.find((h) => h.id === highlightId);
+    if (highlight?.images) {
+      const updatedImages = highlight.images.filter((img) => img !== imageUrl);
+      updateHighlight(highlightId, { images: updatedImages });
+    }
+  };
+
+  const reorderImages = (highlightId: string, startIndex: number, endIndex: number) => {
+    const highlight = profileData.highlights.find((h) => h.id === highlightId);
+    if (highlight?.images) {
+      const images = Array.from(highlight.images);
+      const [removed] = images.splice(startIndex, 1);
+      images.splice(endIndex, 0, removed);
+      updateHighlight(highlightId, { images });
     }
   };
 
@@ -91,7 +122,7 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
-    const items = Array.from(profileData.highlights);
+    const items = Array.from(sortedHighlights);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
@@ -143,7 +174,7 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
                     No highlights added yet
                   </p>
                 ) : (
-                  profileData.highlights.map((highlight, index) => (
+                  sortedHighlights.map((highlight, index) => (
                     <Draggable key={highlight.id} draggableId={highlight.id} index={index}>
                       {(provided, snapshot) => (
                         <div
@@ -188,21 +219,14 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
                           />
 
                           <div className="space-y-2 mb-2">
-                            <Input
-                              value={highlight.image || ''}
-                              onChange={(e) =>
-                                updateHighlight(highlight.id, { image: e.target.value })
-                              }
-                              placeholder="Image URL (optional)"
-                              className="!mb-0"
-                            />
                             <div className="flex gap-2 items-center">
                               <input
                                 type="file"
                                 accept="image/*"
+                                multiple
                                 onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) handleImageUpload(highlight.id, file);
+                                  const files = e.target.files;
+                                  if (files && files.length > 0) handleImageUpload(highlight.id, files);
                                 }}
                                 className="hidden"
                                 id={`image-upload-${highlight.id}`}
@@ -218,19 +242,34 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
                                 disabled={uploadingIds.has(highlight.id)}
                               >
                                 <Upload className="w-4 h-4 mr-1" />
-                                {uploadingIds.has(highlight.id) ? 'Uploading...' : 'Upload Image'}
+                                {uploadingIds.has(highlight.id) ? 'Uploading...' : 'Upload Images'}
                               </Button>
-                              {highlight.image && (
-                                <img
-                                  src={highlight.image}
-                                  alt={highlight.title}
-                                  className="w-12 h-12 object-cover rounded border border-gray-300 dark:border-gray-600"
-                                  onError={(e) => {
-                                    e.currentTarget.src = 'https://via.placeholder.com/48';
-                                  }}
-                                />
-                              )}
                             </div>
+
+                            {/* Display uploaded images */}
+                            {highlight.images && highlight.images.length > 0 && (
+                              <div className="flex gap-2 flex-wrap mt-2">
+                                {(highlight.images ?? []).map((imageUrl, imgIndex) => (
+                                  <div key={imageUrl} className="relative group">
+                                    <img
+                                      src={imageUrl}
+                                      alt={`${highlight.title} ${imgIndex + 1}`}
+                                      className="w-20 h-20 object-cover rounded border-2 border-gray-300 dark:border-gray-600"
+                                      onError={(e) => {
+                                        e.currentTarget.src = 'https://via.placeholder.com/80';
+                                      }}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => removeImage(highlight.id, imageUrl)}
+                                      className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
 
                           <Input
@@ -267,48 +306,57 @@ function HighlightForm({
 }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [image, setImage] = useState('');
+  const [images, setImages] = useState<string[]>([]);
   const [url, setUrl] = useState('');
   const [uploading, setUploading] = useState(false);
 
-  const handleImageUpload = async (file: File) => {
+  const handleImageUpload = async (files: FileList) => {
     try {
       setUploading(true);
 
-      // Get presigned URL
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          fileName: file.name,
-          contentType: file.type,
-        }),
+      const uploadPromises = Array.from(files).map(async (file) => {
+        // Get presigned URL
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            fileName: file.name,
+            contentType: file.type,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get upload URL');
+        }
+
+        const { uploadUrl, publicUrl } = await response.json();
+
+        // Upload to R2
+        const uploadResponse = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: file,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload file');
+        }
+
+        return publicUrl;
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to get upload URL');
-      }
-
-      const { uploadUrl, publicUrl } = await response.json();
-
-      // Upload to R2
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: file,
-      });
-
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload file');
-      }
-
-      setImage(publicUrl);
+      const uploadedUrls = await Promise.all(uploadPromises);
+      setImages((prev) => [...prev, ...uploadedUrls]);
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Failed to upload image');
+      alert('Failed to upload image(s)');
     } finally {
       setUploading(false);
     }
+  };
+
+  const removeImage = (imageUrl: string) => {
+    setImages((prev) => prev.filter((img) => img !== imageUrl));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -317,12 +365,12 @@ function HighlightForm({
       onSubmit({
         title,
         description: description || undefined,
-        image: image || undefined,
+        images: images.length > 0 ? images : undefined,
         url: url || undefined,
       });
       setTitle('');
       setDescription('');
-      setImage('');
+      setImages([]);
       setUrl('');
     }
   };
@@ -344,21 +392,15 @@ function HighlightForm({
         rows={3}
       />
       <div className="space-y-2">
-        <Input
-          label="Image URL"
-          type="url"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
-          placeholder="https://..."
-          className="!mb-0"
-        />
+        <label className="block text-sm font-medium text-foreground">Images</label>
         <div className="flex gap-2 items-center">
           <input
             type="file"
             accept="image/*"
+            multiple
             onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleImageUpload(file);
+              const files = e.target.files;
+              if (files && files.length > 0) handleImageUpload(files);
             }}
             className="hidden"
             id="form-image-upload"
@@ -372,19 +414,32 @@ function HighlightForm({
             disabled={uploading}
           >
             <Upload className="w-4 h-4 mr-1" />
-            {uploading ? 'Uploading...' : 'Upload Image'}
+            {uploading ? 'Uploading...' : 'Upload Images'}
           </Button>
-          {image && (
-            <img
-              src={image}
-              alt="Preview"
-              className="w-12 h-12 object-cover rounded border border-gray-300 dark:border-gray-600"
-              onError={(e) => {
-                e.currentTarget.src = 'https://via.placeholder.com/48';
-              }}
-            />
-          )}
         </div>
+        {images.length > 0 && (
+          <div className="flex gap-2 flex-wrap">
+            {images.map((imageUrl, index) => (
+              <div key={imageUrl} className="relative group">
+                <img
+                  src={imageUrl}
+                  alt={`Preview ${index + 1}`}
+                  className="w-20 h-20 object-cover rounded border-2 border-gray-300 dark:border-gray-600"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://via.placeholder.com/80';
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImage(imageUrl)}
+                  className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <Input
         label="Project URL"

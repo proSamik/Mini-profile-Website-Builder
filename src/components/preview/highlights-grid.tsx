@@ -3,6 +3,7 @@
 import { memo } from 'react';
 import { Highlight } from '@/types/profile';
 import { ExternalLink, Sparkles } from 'lucide-react';
+import { Carousel } from '@/components/ui/carousel';
 
 interface HighlightsGridProps {
   highlights: Highlight[];
@@ -25,13 +26,16 @@ const getGradient = (index: number) => {
 export const HighlightsGrid = memo(function HighlightsGrid({ highlights, forceSingleColumn = false }: HighlightsGridProps) {
   if (highlights.length === 0) return null;
 
+  // Sort highlights by displayOrder
+  const sortedHighlights = [...highlights].sort((a, b) => a.displayOrder - b.displayOrder);
+
   return (
     <div className="p-8">
       <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
         Highlights
       </h2>
       <div className={`grid gap-6 ${forceSingleColumn ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
-        {highlights.map((highlight, index) => {
+        {sortedHighlights.map((highlight, index) => {
           const CardWrapper = highlight.url ? 'a' : 'div';
           const cardProps = highlight.url
             ? {
@@ -58,7 +62,9 @@ export const HighlightsGrid = memo(function HighlightsGrid({ highlights, forceSi
                 </div>
               )}
 
-              {highlight.image ? (
+              {highlight.images && highlight.images.length > 0 ? (
+                <Carousel images={highlight.images} alt={highlight.title} />
+              ) : highlight.image ? (
                 <div className="relative w-full h-48 bg-muted">
                   <img
                     src={highlight.image}

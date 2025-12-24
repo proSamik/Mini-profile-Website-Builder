@@ -6,6 +6,7 @@ import { ProfileData, Link } from '@/types/profile';
 import { Card, CardHeader, CardTitle, CardContent, Input, Button } from '@/components/ui';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { getFaviconUrl } from '@/lib/utils/favicon';
 
 interface LinksManagerProps {
   profileData: ProfileData;
@@ -14,6 +15,9 @@ interface LinksManagerProps {
 
 export function LinksManager({ profileData, onChange }: LinksManagerProps) {
   const [showForm, setShowForm] = useState(false);
+
+  // Sort links by displayOrder
+  const sortedLinks = [...profileData.links].sort((a, b) => a.displayOrder - b.displayOrder);
 
   const addLink = (linkData: Omit<Link, 'id' | 'displayOrder'>) => {
     const newLink: Link = {
@@ -27,7 +31,19 @@ export function LinksManager({ profileData, onChange }: LinksManagerProps) {
     });
   };
 
-  const updateLink = (linkId: string, updates: Partial<Link>) => {
+  const updateLink = async (linkId: string, updates: Partial<Link>) => {
+    // If URL is being updated, fetch the favicon
+    if (updates.url) {
+      try {
+        const favicon = await getFaviconUrl(updates.url);
+        if (favicon) {
+          updates.favicon = favicon;
+        }
+      } catch (error) {
+        console.error('Error fetching favicon:', error);
+      }
+    }
+
     onChange({
       links: profileData.links.map((link) =>
         link.id === linkId ? { ...link, ...updates } : link
@@ -44,7 +60,7 @@ export function LinksManager({ profileData, onChange }: LinksManagerProps) {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
-    const items = Array.from(profileData.links);
+    const items = Array.from(sortedLinks);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
@@ -95,7 +111,7 @@ export function LinksManager({ profileData, onChange }: LinksManagerProps) {
                     No links added yet
                   </p>
                 ) : (
-                  profileData.links.map((link, index) => (
+                  sortedLinks.map((link, index) => (
                     <Draggable key={link.id} draggableId={link.id} index={index}>
                       {(provided, snapshot) => (
                         <div
@@ -155,17 +171,34 @@ function LinkForm({
 }) {
   const [label, setLabel] = useState('');
   const [url, setUrl] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (label && url) {
-      onSubmit({
-        label,
-        url,
-        icon: label.toLowerCase(),
-      });
-      setLabel('');
-      setUrl('');
+      setLoading(true);
+      try {
+        const favicon = await getFaviconUrl(url);
+        onSubmit({
+          label,
+          url,
+          icon: label.toLowerCase(),
+          favicon: favicon || undefined,
+        });
+        setLabel('');
+        setUrl('');
+      } catch (error) {
+        console.error('Error fetching favicon:', error);
+        onSubmit({
+          label,
+          url,
+          icon: label.toLowerCase(),
+        });
+        setLabel('');
+        setUrl('');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -187,10 +220,10 @@ function LinkForm({
         required
       />
       <div className="flex gap-2">
-        <Button type="submit" size="sm">
-          Add
+        <Button type="submit" size="sm" disabled={loading}>
+          {loading ? 'Adding...' : 'Add'}
         </Button>
-        <Button type="button" size="sm" variant="secondary" onClick={onCancel}>
+        <Button type="button" size="sm" variant="secondary" onClick={onCancel} disabled={loading}>
           Cancel
         </Button>
       </div>
