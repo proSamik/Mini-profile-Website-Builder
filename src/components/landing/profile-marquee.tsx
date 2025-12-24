@@ -68,21 +68,41 @@ export function ProfileMarquee() {
           <p className="text-muted-foreground mt-2">Join our growing community</p>
         </div>
 
-        <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
-          <Marquee pauseOnHover className="[--duration:20s]">
-            {firstRow.map((profile) => (
-              <ProfileCard key={profile.id} profile={profile} />
-            ))}
-          </Marquee>
-          <Marquee reverse pauseOnHover className="[--duration:20s]">
-            {secondRow.map((profile) => (
-              <ProfileCard key={profile.id} profile={profile} />
-            ))}
-          </Marquee>
+        <div className="relative flex h-96 w-full flex-row items-center justify-center gap-4 overflow-hidden [perspective:300px]">
+          <div
+            className="flex flex-row items-center gap-4"
+            style={{
+              transform:
+                "translateX(-50px) translateY(0px) translateZ(-50px) rotateX(15deg) rotateY(-8deg) rotateZ(10deg)",
+            }}
+          >
+            <Marquee pauseOnHover vertical className="[--duration:20s]">
+              {firstRow.map((profile) => (
+                <ProfileCard key={profile.id} profile={profile} />
+              ))}
+            </Marquee>
+            <Marquee reverse pauseOnHover vertical className="[--duration:20s]">
+              {secondRow.map((profile) => (
+                <ProfileCard key={profile.id} profile={profile} />
+              ))}
+            </Marquee>
+            <Marquee pauseOnHover vertical className="[--duration:20s]">
+              {firstRow.map((profile) => (
+                <ProfileCard key={`${profile.id}-2`} profile={profile} />
+              ))}
+            </Marquee>
+            <Marquee reverse pauseOnHover vertical className="[--duration:20s]">
+              {secondRow.map((profile) => (
+                <ProfileCard key={`${profile.id}-2`} profile={profile} />
+              ))}
+            </Marquee>
+          </div>
 
           {/* Gradient overlays for fade effect */}
           <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background"></div>
           <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-background"></div>
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-background"></div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background"></div>
         </div>
 
         <div className="text-center mt-8">

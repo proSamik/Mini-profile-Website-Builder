@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SessionProvider } from "@/components/providers/session-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,10 +33,10 @@ export default function RootLayout({
                 try {
                   const savedTheme = localStorage.getItem('theme') || 'system';
                   const root = document.documentElement;
-                  
+
                   // Remove any existing theme classes
                   root.classList.remove('dark', 'light');
-                  
+
                   if (savedTheme === 'dark') {
                     root.classList.add('dark');
                   } else if (savedTheme === 'light') {
@@ -53,7 +54,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );

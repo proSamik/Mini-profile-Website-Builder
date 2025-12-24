@@ -3,6 +3,7 @@ import { getProfileByUsername } from '@/lib/db/queries';
 import { ProfileCard } from '@/components/preview/profile-card';
 import { LinksSection } from '@/components/preview/links-section';
 import { HighlightsGrid } from '@/components/preview/highlights-grid';
+import { EditButton } from '@/components/profile/edit-button';
 import { ProfileData } from '@/types/profile';
 
 interface PageProps {
@@ -24,6 +25,7 @@ export default async function ProfilePage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      <EditButton username={username} />
       <div className="max-w-4xl mx-auto">
         <ProfileCard profileData={profileData} />
         <LinksSection links={profileData.links} />
