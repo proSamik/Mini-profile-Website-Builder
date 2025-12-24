@@ -21,7 +21,6 @@ export function ProfileCardMini({ profile }: ProfileCardMiniProps) {
               width={64}
               height={64}
               className="w-16 h-16 rounded-full object-cover flex-shrink-0"
-              unoptimized={data.profilePhoto.value.includes('r2.dev')}
             />
           ) : (
             <div className="w-16 h-16 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">

@@ -42,7 +42,6 @@ export function ProfileMarquee() {
                 width={48}
                 height={48}
                 className="w-12 h-12 rounded-full object-cover"
-                unoptimized={data.profilePhoto.value.includes('r2.dev')}
               />
             ) : (
               <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-xl">
