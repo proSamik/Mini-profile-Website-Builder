@@ -177,8 +177,8 @@ export function ProfileInfoCard({ profileData, onChange, userId, onUsernameValid
             {/* Row 1: Profile Photo (left) | Username (right) */}
             <div className="grid grid-cols-2 gap-4 items-start">
               {/* Left: Profile Photo */}
-              <div className="flex flex-col items-center gap-3">
-                <div className="relative w-32 h-32 flex-shrink-0">
+              <div className="flex flex-col items-center">
+                <div className="relative w-32 h-32 flex-shrink-0 group">
                   {hasPhoto ? (
                     <img
                       src={profileData.profilePhoto.value}
@@ -203,17 +203,16 @@ export function ProfileInfoCard({ profileData, onChange, userId, onUsernameValid
                       </span>
                     </div>
                   )}
-                </div>
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsModalOpen(true)}
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Photo
-                </Button>
+                  {/* Edit button overlay */}
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(true)}
+                    className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Edit className="w-6 h-6 text-white" />
+                  </button>
+                </div>
               </div>
 
               {/* Right: Username */}

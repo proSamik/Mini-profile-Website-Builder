@@ -66,13 +66,15 @@ export function LivePreview({ profileData }: LivePreviewProps) {
         /* Mobile view with bezel */
         <div className="mx-auto" style={{ width: '375px' }}>
           {/* Mobile device bezel */}
-          <div className="bg-gray-900 rounded-[3rem] p-3 shadow-2xl">
+          <div className="bg-muted/50 border-2 border-border rounded-[3rem] p-3 shadow-2xl">
             {/* Notch */}
-            <div className="bg-black h-6 rounded-t-[2.5rem] relative">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-gray-900 w-32 h-6 rounded-b-2xl" />
+            <div className="bg-muted border-b border-border h-6 rounded-t-[2.5rem] relative">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-card border border-border w-32 h-6 rounded-b-2xl flex items-center justify-center">
+                <div className="w-16 h-1 bg-muted-foreground/20 rounded-full" />
+              </div>
             </div>
             {/* Screen */}
-            <div className="bg-background rounded-b-[2rem] overflow-hidden" style={{ height: '667px' }}>
+            <div className="bg-background rounded-b-[2rem] overflow-hidden border border-border" style={{ height: '667px' }}>
               <div className="h-full overflow-y-auto">
                 <ProfileCard profileData={profileData} />
                 {/* Layout 4 renders highlights before links */}
@@ -90,7 +92,7 @@ export function LivePreview({ profileData }: LivePreviewProps) {
               </div>
             </div>
             {/* Bottom indicator */}
-            <div className="h-1 mt-2 bg-gray-700 w-32 mx-auto rounded-full" />
+            <div className="h-1 mt-2 bg-muted-foreground/30 w-32 mx-auto rounded-full" />
           </div>
         </div>
       ) : (
