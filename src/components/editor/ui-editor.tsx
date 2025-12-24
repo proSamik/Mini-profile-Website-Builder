@@ -6,6 +6,7 @@ import { ProfileBasicsForm } from './profile-basics-form';
 import { PhotoUploader } from './photo-uploader';
 import { LinksManager } from './links-manager';
 import { HighlightsManager } from './highlights-manager';
+import { LayoutSelector } from './layout-selector';
 
 interface UIEditorProps {
   profileData: ProfileData;
@@ -24,6 +25,7 @@ export function UIEditor({ profileData, onChange, userId, onUsernameValidChange 
         onUsernameValidChange={onUsernameValidChange}
       />
       <PhotoUploader profileData={profileData} onChange={onChange} userId={userId} />
+      <LayoutSelector profileData={profileData} onChange={onChange} />
       <LinksManager profileData={profileData} onChange={onChange} />
       <HighlightsManager profileData={profileData} onChange={onChange} userId={userId} />
     </div>

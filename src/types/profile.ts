@@ -22,6 +22,8 @@ export interface Highlight {
   category?: string;
 }
 
+export type ProfileLayout = 'default' | 'layout1' | 'layout2' | 'layout3' | 'layout4';
+
 export interface ProfileData {
   username: string;
   displayName: string;
@@ -29,6 +31,7 @@ export interface ProfileData {
   profilePhoto: ProfilePhoto;
   links: Link[];
   highlights: Highlight[];
+  layout?: ProfileLayout; // Profile layout preference (defaults to 'default')
 }
 
 export interface ProfileResponse {

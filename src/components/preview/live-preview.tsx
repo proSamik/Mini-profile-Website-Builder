@@ -23,6 +23,8 @@ export function LivePreview({ profileData }: LivePreviewProps) {
     [viewMode]
   );
 
+  const layout = profileData.layout || 'default';
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -50,8 +52,18 @@ export function LivePreview({ profileData }: LivePreviewProps) {
 
       <div className={containerClassName}>
         <ProfileCard profileData={profileData} />
-        <LinksSection links={profileData.links} />
-        <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={viewMode === 'mobile'} />
+        {/* Layout 4 renders highlights before links */}
+        {layout === 'layout4' ? (
+          <>
+            <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={viewMode === 'mobile'} />
+            <LinksSection links={profileData.links} />
+          </>
+        ) : (
+          <>
+            <LinksSection links={profileData.links} />
+            <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={viewMode === 'mobile'} />
+          </>
+        )}
       </div>
     </div>
   );

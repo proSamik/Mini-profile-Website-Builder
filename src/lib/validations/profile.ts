@@ -35,6 +35,7 @@ export const ProfileDataSchema = z.object({
   profilePhoto: ProfilePhotoSchema,
   links: z.array(LinkSchema),
   highlights: z.array(HighlightSchema),
+  layout: z.enum(['default', 'layout1', 'layout2', 'layout3', 'layout4']).optional(),
 });
 
 export const CreateProfileSchema = z.object({

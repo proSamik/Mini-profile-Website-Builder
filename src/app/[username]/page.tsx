@@ -22,14 +22,25 @@ export default async function ProfilePage({ params }: PageProps) {
   }
 
   const profileData = profile.profileData as ProfileData;
+  const layout = profileData.layout || 'default';
 
   return (
     <div className="min-h-screen bg-background">
       <EditButton username={username} />
       <div className="max-w-4xl mx-auto">
         <ProfileCard profileData={profileData} />
-        <LinksSection links={profileData.links} />
-        <HighlightsGrid highlights={profileData.highlights} />
+        {/* Layout 4 renders highlights before links */}
+        {layout === 'layout4' ? (
+          <>
+            <HighlightsGrid highlights={profileData.highlights} />
+            <LinksSection links={profileData.links} />
+          </>
+        ) : (
+          <>
+            <LinksSection links={profileData.links} />
+            <HighlightsGrid highlights={profileData.highlights} />
+          </>
+        )}
       </div>
     </div>
   );
