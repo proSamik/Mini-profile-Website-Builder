@@ -42,7 +42,7 @@ export function ProfileBasicsForm({ profileData, onChange, userId, onUsernameVal
       setChecking(true);
       try {
         const res = await fetch(
-          `/api/profiles/check-username?username=${encodeURIComponent(username)}`
+          `/api/profiles/check-username?username=${encodeURIComponent(username)}&excludeUserId=${encodeURIComponent(userId)}`
         );
         const data = await res.json();
         setUsernameAvailable(data.available);
@@ -57,7 +57,7 @@ export function ProfileBasicsForm({ profileData, onChange, userId, onUsernameVal
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [profileData.username, originalUsername, onChange, onUsernameValidChange]);
+  }, [profileData.username, originalUsername, onChange, onUsernameValidChange, userId]);
 
   return (
     <Card>

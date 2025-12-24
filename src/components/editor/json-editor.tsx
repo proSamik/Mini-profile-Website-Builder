@@ -82,7 +82,7 @@ export function JSONEditor({ profileData, onChange, userId, onUsernameValidChang
       setChecking(true);
       try {
         const res = await fetch(
-          `/api/profiles/check-username?username=${encodeURIComponent(username)}`
+          `/api/profiles/check-username?username=${encodeURIComponent(username)}&excludeUserId=${encodeURIComponent(userId)}`
         );
         const data = await res.json();
         setUsernameAvailable(data.available);
@@ -97,7 +97,7 @@ export function JSONEditor({ profileData, onChange, userId, onUsernameValidChang
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [parsedUsername, originalUsername, onUsernameValidChange]);
+  }, [parsedUsername, originalUsername, onUsernameValidChange, userId]);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     // Replace smart quotes with regular quotes
