@@ -2,9 +2,16 @@ import Link from 'next/link';
 import { getRecentProfiles } from '@/lib/db/queries';
 import { ProfileCardMini } from '@/components/profiles/profile-card-mini';
 import { Button } from '@/components/ui/button';
+import { Profile } from '@/lib/db/schema';
+
+export const dynamic = 'force-dynamic';
 
 export default async function ProfilesPage() {
-  const profiles = await getRecentProfiles(100);
+  let profiles: Profile[] = [];
+  try {
+    profiles = await getRecentProfiles(100);
+  } catch {
+  }
 
   return (
     <main className="min-h-screen bg-background py-12 px-4">

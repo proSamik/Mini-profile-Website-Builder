@@ -167,10 +167,14 @@ export function JSONEditor({ profileData, onChange, userId, onUsernameValidChang
             <div className="flex items-center gap-1">
               {checking && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
               {!checking && usernameAvailable === true && (
-                <CheckCircle2 className="w-4 h-4 text-green-500" title="Username available" />
+                <span title="Username available">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                </span>
               )}
               {!checking && usernameAvailable === false && (
-                <XCircle className="w-4 h-4 text-red-500" title="Username already taken" />
+                <span title="Username already taken">
+                  <XCircle className="w-4 h-4 text-red-500" />
+                </span>
               )}
             </div>
           )}
