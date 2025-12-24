@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Profile } from '@/lib/db/schema';
 import { ProfileData } from '@/types/profile';
 import { Marquee } from '@/components/ui/marquee';
+import { cn } from '@/lib/utils/cn';
 
 export function ProfileMarquee() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -18,6 +19,10 @@ export function ProfileMarquee() {
 
   if (profiles.length === 0) return null;
 
+  // Split profiles into two rows for alternating marquee effect
+  const firstRow = profiles.slice(0, Math.ceil(profiles.length / 2));
+  const secondRow = profiles.slice(Math.ceil(profiles.length / 2));
+
   const ProfileCard = ({ profile }: { profile: Profile }) => {
     const data = profile.profileData as ProfileData;
     return (
@@ -25,7 +30,9 @@ export function ProfileMarquee() {
         href={`/${profile.username}`}
         className="flex-shrink-0 w-64"
       >
-        <div className="glass-card rounded-2xl p-6 hover:shadow-glow-purple hover:scale-105 transition-all duration-300">
+        <div className={cn(
+          "glass-card rounded-2xl p-6 hover:shadow-glow-purple hover:scale-105 transition-all duration-300"
+        )}>
           <div className="flex items-center gap-4">
             {data.profilePhoto.type === 'url' ? (
               <img
@@ -61,9 +68,14 @@ export function ProfileMarquee() {
           <p className="text-muted-foreground mt-2">Join our growing community</p>
         </div>
 
-        <div className="relative">
-          <Marquee pauseOnHover className="[--duration:30s]">
-            {profiles.map((profile) => (
+        <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
+          <Marquee pauseOnHover className="[--duration:20s]">
+            {firstRow.map((profile) => (
+              <ProfileCard key={profile.id} profile={profile} />
+            ))}
+          </Marquee>
+          <Marquee reverse pauseOnHover className="[--duration:20s]">
+            {secondRow.map((profile) => (
               <ProfileCard key={profile.id} profile={profile} />
             ))}
           </Marquee>

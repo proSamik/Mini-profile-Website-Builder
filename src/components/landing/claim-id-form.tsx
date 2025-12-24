@@ -47,7 +47,7 @@ export function ClaimIdForm() {
         <Input
           label="Claim Your Username"
           value={username}
-          onChange={(e) => setUsername(e.target.value.toLowerCase())}
+          onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
           placeholder="yourname"
           className="pr-10"
         />
