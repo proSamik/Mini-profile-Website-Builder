@@ -8,14 +8,69 @@ import { ProfileData } from '@/types/profile';
 import { Marquee } from '@/components/ui/marquee';
 import { cn } from '@/lib/utils/cn';
 
+const CACHE_KEY = 'marquee_profiles';
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+function getCachedProfiles(): Profile[] | null {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) return null;
+    
+    const { data, timestamp } = JSON.parse(cached);
+    const now = Date.now();
+    
+    // Check if cache is still valid
+    if (now - timestamp < CACHE_DURATION) {
+      return data;
+    }
+    
+    // Cache expired, remove it
+    localStorage.removeItem(CACHE_KEY);
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedProfiles(profiles: Profile[]) {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      data: profiles,
+      timestamp: Date.now(),
+    }));
+  } catch {
+    // Ignore localStorage errors
+  }
+}
+
 export function ProfileMarqueeBackground() {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>(() => {
+    // Load from cache immediately for instant render
+    return getCachedProfiles() || [];
+  });
 
   useEffect(() => {
-    fetch('/api/profiles/recent')
+    // Fetch fresh data in the background
+    fetch('/api/profiles/recent', {
+      cache: 'force-cache',
+    })
       .then((res) => res.json())
-      .then((data) => setProfiles(data))
-      .catch((err) => console.error('Failed to fetch profiles:', err));
+      .then((data) => {
+        setProfiles(data);
+        setCachedProfiles(data);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch profiles:', err);
+        // If fetch fails, keep using cached data if available
+        const cached = getCachedProfiles();
+        if (cached) {
+          setProfiles(cached);
+        }
+      });
   }, []);
 
   if (profiles.length === 0) return null;
