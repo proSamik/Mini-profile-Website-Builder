@@ -195,13 +195,25 @@ export function PhotoUploader({ profileData, onChange, userId }: PhotoUploaderPr
             <>
           {/* Current Photo Preview */}
           <div className="flex justify-center">
-            <div className="relative w-32 h-32">
+            <div className="relative w-32 h-32 group">
               {hasPhoto ? (
-                <img
-                  src={profileData.profilePhoto.value}
-                  alt="Profile"
-                  className="w-full h-full rounded-full object-cover border-4 border-gray-200 dark:border-gray-700"
-                />
+                <>
+                  <img
+                    src={profileData.profilePhoto.value}
+                    alt="Profile"
+                    className="w-full h-full rounded-full object-cover border-4 border-gray-200 dark:border-gray-700"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Use the image URL directly - the cropper can handle URLs
+                      setImageToCrop(profileData.profilePhoto.value);
+                    }}
+                    className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Edit className="w-6 h-6 text-white" />
+                  </button>
+                </>
               ) : (
                 <div
                   className={`w-full h-full rounded-full bg-gradient-to-br ${getGradient()} flex items-center justify-center border-4 border-gray-200 dark:border-gray-700`}

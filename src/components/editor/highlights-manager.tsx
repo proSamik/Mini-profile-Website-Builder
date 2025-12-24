@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid';
 import { ProfileData, Highlight } from '@/types/profile';
 import { Card, CardHeader, CardTitle, CardContent, Input, Textarea, Button, Modal } from '@/components/ui';
 import { ImageCropper } from '@/components/ui/image-cropper';
-import { Plus, Trash2, GripVertical, Upload } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Upload, Edit } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -296,11 +296,11 @@ function SortableHighlightItem({
         isDragging ? 'shadow-lg opacity-50 z-50' : ''
       }`}
     >
-      <div className="flex gap-2 mb-2">
+      <div className="flex gap-2 mb-2 items-center">
         <div
           {...attributes}
           {...listeners}
-          className="flex items-center cursor-grab active:cursor-grabbing"
+          className="flex items-center cursor-grab active:cursor-grabbing self-stretch"
         >
           <GripVertical className="w-5 h-5 text-muted-foreground" />
         </div>
@@ -316,7 +316,7 @@ function SortableHighlightItem({
           size="sm"
           variant="danger"
           onClick={() => onDelete(highlight.id)}
-          className="shrink-0"
+          className="shrink-0 self-center"
         >
           <Trash2 className="w-4 h-4" />
         </Button>
@@ -331,28 +331,26 @@ function SortableHighlightItem({
       />
 
       <div className="space-y-2 mb-2">
-        <div className="flex gap-2 items-center">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => onFileSelect(highlight.id, e)}
-            className="hidden"
-            id={`image-upload-${highlight.id}`}
-            disabled={uploadingIds.has(highlight.id)}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              document.getElementById(`image-upload-${highlight.id}`)?.click()
-            }
-            disabled={uploadingIds.has(highlight.id)}
-          >
-            <Upload className="w-4 h-4 mr-1" />
-            {uploadingIds.has(highlight.id) ? 'Uploading...' : 'Upload Image'}
-          </Button>
-        </div>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => onFileSelect(highlight.id, e)}
+          className="hidden"
+          id={`image-upload-${highlight.id}`}
+          disabled={uploadingIds.has(highlight.id)}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            document.getElementById(`image-upload-${highlight.id}`)?.click()
+          }
+          disabled={uploadingIds.has(highlight.id)}
+        >
+          <Upload className="w-4 h-4 mr-1" />
+          {uploadingIds.has(highlight.id) ? 'Uploading...' : 'Upload Image'}
+        </Button>
 
         {/* Display uploaded images with drag-and-drop reordering */}
         {highlight.images && highlight.images.length > 0 && (
@@ -372,6 +370,10 @@ function SortableHighlightItem({
                     imageUrl={imageUrl}
                     highlightTitle={highlight.title}
                     onRemove={() => onRemoveImage(highlight.id, imageUrl)}
+                    onEdit={(imageData) => {
+                      // Set the image to crop
+                      setImageToCrop({ highlightId: highlight.id, imageData });
+                    }}
                   />
                 ))}
               </div>
@@ -394,10 +396,12 @@ function SortableImageItem({
   imageUrl,
   highlightTitle,
   onRemove,
+  onEdit,
 }: {
   imageUrl: string;
   highlightTitle: string;
   onRemove: () => void;
+  onEdit: (imageData: string) => void;
 }) {
   const {
     attributes,
@@ -418,17 +422,33 @@ function SortableImageItem({
       ref={setNodeRef}
       style={style}
       className={`relative group ${isDragging ? 'z-50 opacity-50' : ''}`}
-      {...attributes}
-      {...listeners}
     >
-      <img
-        src={imageUrl}
-        alt={highlightTitle}
-        className="w-20 h-20 object-cover rounded border-2 border-gray-300 dark:border-gray-600 cursor-grab active:cursor-grabbing"
-        onError={(e) => {
-          e.currentTarget.src = 'https://via.placeholder.com/80';
-        }}
-      />
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing relative"
+      >
+        <img
+          src={imageUrl}
+          alt={highlightTitle}
+          className="w-20 h-20 object-cover rounded border-2 border-gray-300 dark:border-gray-600"
+          onError={(e) => {
+            e.currentTarget.src = 'https://via.placeholder.com/80';
+          }}
+        />
+        {/* Edit overlay */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            // Use the image URL directly - the cropper can handle URLs
+            onEdit(imageUrl);
+          }}
+          className="absolute inset-0 flex items-center justify-center bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <Edit className="w-5 h-5 text-white" />
+        </button>
+      </div>
       <button
         type="button"
         onClick={(e) => {
