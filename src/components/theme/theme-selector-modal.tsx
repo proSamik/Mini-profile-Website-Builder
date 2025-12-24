@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal, Button } from '@/components/ui';
 import { ThemePackCard } from './theme-pack-card';
 import { themePacks } from '@/data/theme-packs';
@@ -26,6 +26,47 @@ export function ThemeSelectorModal({
   const [selectedPackId, setSelectedPackId] = useState(
     currentTheme?.packId || 'default'
   );
+  const [originalTheme, setOriginalTheme] = useState<string | null>(null);
+
+  // Save original theme when modal opens
+  useEffect(() => {
+    if (isOpen && originalTheme === null) {
+      const savedTheme = localStorage.getItem('theme') || 'system';
+      setOriginalTheme(savedTheme);
+    }
+  }, [isOpen, originalTheme]);
+
+  // Apply temporary dark mode based on preview mode
+  useEffect(() => {
+    if (isOpen) {
+      const root = document.documentElement;
+      if (previewMode === 'dark') {
+        root.classList.remove('light');
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+        root.classList.add('light');
+      }
+    }
+  }, [isOpen, previewMode]);
+
+  // Revert to original theme when modal closes
+  useEffect(() => {
+    if (!isOpen && originalTheme !== null) {
+      const root = document.documentElement;
+      root.classList.remove('dark', 'light');
+      
+      if (originalTheme === 'dark') {
+        root.classList.add('dark');
+      } else if (originalTheme === 'light') {
+        root.classList.add('light');
+      } else {
+        // system
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        root.classList.add(systemPrefersDark ? 'dark' : 'light');
+      }
+    }
+  }, [isOpen, originalTheme]);
 
   const handleApply = () => {
     onSelect({

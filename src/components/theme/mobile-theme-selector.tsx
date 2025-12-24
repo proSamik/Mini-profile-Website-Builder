@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui';
 import { ThemePackCard } from './theme-pack-card';
 import { themePacks } from '@/data/theme-packs';
@@ -27,22 +27,86 @@ export function MobileThemeSelector({
   const [selectedPackId, setSelectedPackId] = useState(
     currentTheme?.packId || 'default'
   );
+  const [originalTheme, setOriginalTheme] = useState<string | null>(null);
+
+  // Save original theme on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'system';
+    setOriginalTheme(savedTheme);
+  }, []);
+
+  // Apply temporary dark mode based on preview mode
+  useEffect(() => {
+    const root = document.documentElement;
+    if (previewMode === 'dark') {
+      root.classList.remove('light');
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+      root.classList.add('light');
+    }
+  }, [previewMode]);
+
+  // Revert to original theme when component unmounts
+  useEffect(() => {
+    return () => {
+      if (originalTheme !== null) {
+        const root = document.documentElement;
+        root.classList.remove('dark', 'light');
+        
+        if (originalTheme === 'dark') {
+          root.classList.add('dark');
+        } else if (originalTheme === 'light') {
+          root.classList.add('light');
+        } else {
+          // system
+          const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          root.classList.add(systemPrefersDark ? 'dark' : 'light');
+        }
+      }
+    };
+  }, [originalTheme]);
+
+  // Revert to original theme when component closes
+  const handleClose = () => {
+    if (originalTheme !== null) {
+      const root = document.documentElement;
+      root.classList.remove('dark', 'light');
+      
+      if (originalTheme === 'dark') {
+        root.classList.add('dark');
+      } else if (originalTheme === 'light') {
+        root.classList.add('light');
+      } else {
+        // system
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        root.classList.add(systemPrefersDark ? 'dark' : 'light');
+      }
+    }
+    onClose();
+  };
 
   const handleApply = () => {
     onSelect({
       packId: selectedPackId,
       mode: previewMode,
     });
-    onClose();
+    handleClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-background z-50 flex flex-col">
-      {/* Header */}
-      <div className="flex-none border-b border-border bg-card p-4">
+    <div 
+      className="fixed inset-0 z-50 flex flex-col" 
+      style={{ 
+        backgroundColor: 'var(--background)',
+        backdropFilter: 'blur(8px)',
+      }}
+    >
+        {/* Header */}
+        <div className="flex-none border-b border-border bg-card p-4" style={{ backgroundColor: 'var(--card)' }}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-foreground">Choose Theme</h2>
-          <Button size="sm" variant="outline" onClick={onClose}>
+          <Button size="sm" variant="outline" onClick={handleClose}>
             Cancel
           </Button>
         </div>
@@ -71,7 +135,7 @@ export function MobileThemeSelector({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 bg-background" style={{ backgroundColor: 'var(--background)' }}>
         {activeTab === 'themes' ? (
           <div className="grid grid-cols-2 gap-3">
             {themePacks.map((pack) => (
@@ -96,7 +160,7 @@ export function MobileThemeSelector({
       </div>
 
       {/* Bottom Navigation */}
-      <div className="flex-none border-t border-border bg-card">
+      <div className="flex-none border-t border-border bg-card" style={{ backgroundColor: 'var(--card)' }}>
         <div className="grid grid-cols-2 gap-2 p-2">
           <button
             onClick={() => setActiveTab('themes')}
