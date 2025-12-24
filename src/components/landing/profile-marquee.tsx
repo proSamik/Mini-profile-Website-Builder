@@ -18,7 +18,8 @@ export function ProfileMarquee() {
   if (profiles.length === 0) return null;
 
   // Duplicate profiles for seamless infinite scroll only if we have enough profiles
-  const displayProfiles = profiles.length >= 3 ? [...profiles, ...profiles] : profiles;
+  const shouldAnimate = profiles.length >= 3;
+  const displayProfiles = shouldAnimate ? [...profiles, ...profiles] : profiles;
 
   return (
     <section className="pt-6 pb-12 px-4 overflow-hidden">
@@ -29,7 +30,7 @@ export function ProfileMarquee() {
         </div>
 
         <div className="relative">
-        <div className="flex gap-6 animate-marquee">
+        <div className={`flex gap-6 ${shouldAnimate ? 'animate-marquee' : 'justify-center'}`}>
           {displayProfiles.map((profile, idx) => {
             const data = profile.profileData as ProfileData;
             return (
