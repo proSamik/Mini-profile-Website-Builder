@@ -15,38 +15,38 @@ export function ThemePackCard({ pack, mode, isSelected, onClick }: ThemePackCard
   return (
     <button
       onClick={onClick}
-      className={`relative w-full text-left rounded-xl overflow-hidden transition-all ${
+      className={`relative w-full text-left rounded-lg overflow-hidden transition-all ${
         isSelected
-          ? 'ring-2 ring-primary ring-offset-2 ring-offset-background scale-105'
-          : 'hover:scale-102 hover:shadow-lg'
+          ? 'ring-2 ring-primary ring-offset-1 ring-offset-background'
+          : 'hover:shadow-md border border-transparent hover:border-border'
       }`}
     >
       {/* Gradient Preview Banner */}
       <div
-        className="h-16 w-full"
+        className="h-12 w-full"
         style={{ background: pack.preview.thumbnail }}
       />
 
       {/* Theme Preview Content */}
       <div
-        className="p-3 border-2 border-t-0 border-border"
+        className="p-2.5 border border-t-0 border-border"
         style={{ backgroundColor: colors.background }}
       >
-        <h3 className="font-bold text-sm text-foreground mb-0.5">{pack.name}</h3>
-        <p className="text-xs text-muted-foreground mb-2">{pack.description}</p>
+        <h3 className="font-bold text-xs text-foreground mb-0.5 leading-tight">{pack.name}</h3>
+        <p className="text-[10px] text-muted-foreground mb-1.5 leading-tight line-clamp-1">{pack.description}</p>
 
         {/* Mini Preview Elements */}
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           {/* Card preview */}
           <div
-            className="h-6 rounded-lg"
+            className="h-5 rounded"
             style={{ backgroundColor: colors.cardBackground }}
           />
 
           {/* Button preview with gradient */}
           {colors.gradient && (
             <div
-              className="h-6 rounded-lg"
+              className="h-5 rounded"
               style={{
                 background: colors.gradient.via
                   ? `linear-gradient(to right, ${colors.gradient.from}, ${colors.gradient.via}, ${colors.gradient.to})`
@@ -57,7 +57,7 @@ export function ThemePackCard({ pack, mode, isSelected, onClick }: ThemePackCard
         </div>
 
         {isSelected && (
-          <div className="absolute top-1.5 right-1.5 bg-primary text-primary-foreground px-1.5 py-0.5 rounded text-xs font-medium">
+          <div className="absolute top-1 right-1 bg-primary text-primary-foreground px-1.5 py-0.5 rounded text-[10px] font-medium leading-none">
             Selected
           </div>
         )}

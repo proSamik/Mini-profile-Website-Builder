@@ -81,7 +81,7 @@ export function ThemeSelectorModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Choose Theme Pack"
-      size="xl"
+      size="lg"
     >
       <div className="space-y-3">
         {/* Light/Dark Mode Toggle */}
@@ -107,21 +107,23 @@ export function ThemeSelectorModal({
           </div>
         </div>
 
-        {/* Theme Packs Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto">
-          {themePacks.map((pack) => (
-            <ThemePackCard
-              key={pack.id}
-              pack={pack}
-              mode={previewMode}
-              isSelected={selectedPackId === pack.id}
-              onClick={() => setSelectedPackId(pack.id)}
-            />
-          ))}
+        {/* Theme Packs Grid - Compact with proper padding */}
+        <div className="p-2 -mx-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 max-h-[400px] overflow-y-auto px-2">
+            {themePacks.map((pack) => (
+              <ThemePackCard
+                key={pack.id}
+                pack={pack}
+                mode={previewMode}
+                isSelected={selectedPackId === pack.id}
+                onClick={() => setSelectedPackId(pack.id)}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3 pt-3 border-t border-border">
+        <div className="flex justify-end gap-3 pt-2 border-t border-border">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
