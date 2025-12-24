@@ -28,7 +28,7 @@ export function ProfileMarqueeBackground() {
     return (
       <Link
         href={`/${profile.username}`}
-        className="flex-shrink-0 w-64 opacity-40 hover:opacity-60 transition-opacity"
+        className="flex-shrink-0 w-64"
       >
         <div className={cn(
           "glass-card rounded-2xl p-6 transition-all duration-300"
