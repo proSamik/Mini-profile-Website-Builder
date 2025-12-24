@@ -29,6 +29,12 @@ export const HighlightsGrid = memo(function HighlightsGrid({ highlights, forceSi
   // Sort highlights by displayOrder
   const sortedHighlights = [...highlights].sort((a, b) => a.displayOrder - b.displayOrder);
 
+  console.log('Highlights in preview:', sortedHighlights.map(h => ({ 
+    title: h.title, 
+    images: h.images, 
+    imageCount: h.images?.length 
+  })));
+
   return (
     <div className="p-8">
       <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
@@ -64,17 +70,6 @@ export const HighlightsGrid = memo(function HighlightsGrid({ highlights, forceSi
 
               {highlight.images && highlight.images.length > 0 ? (
                 <Carousel images={highlight.images} alt={highlight.title} />
-              ) : highlight.image ? (
-                <div className="relative w-full h-48 bg-muted">
-                  <img
-                    src={highlight.image}
-                    alt={highlight.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
               ) : (
                 <div className={`relative w-full h-48 bg-gradient-to-br ${getGradient(index)} flex items-center justify-center`}>
                   <div className="absolute inset-0 bg-black/10"></div>

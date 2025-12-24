@@ -12,12 +12,30 @@ export async function GET(request: NextRequest) {
     // Validate URL
     const urlObj = new URL(url);
     
-    // Use Google's favicon service as it's reliable and fast
-    const faviconUrl = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
+    // Use favicone.com API
+    const faviconeUrl = `https://favicone.com/${urlObj.hostname}`;
+    const response = await fetch(faviconeUrl);
     
+    if (response.ok) {
+      const data = await response.json();
+      if (data.hasIcon && data.icon) {
+        return NextResponse.json({ favicon: data.icon });
+      }
+    }
+    
+    // Fallback to Google's favicon service
+    const faviconUrl = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
     return NextResponse.json({ favicon: faviconUrl });
   } catch (error) {
     console.error('Error fetching favicon:', error);
-    return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+    
+    // Try to extract domain and use Google's service as fallback
+    try {
+      const urlObj = new URL(url);
+      const faviconUrl = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
+      return NextResponse.json({ favicon: faviconUrl });
+    } catch {
+      return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+    }
   }
 }

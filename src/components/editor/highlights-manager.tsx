@@ -1,11 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { nanoid } from 'nanoid';
 import { ProfileData, Highlight } from '@/types/profile';
 import { Card, CardHeader, CardTitle, CardContent, Input, Textarea, Button } from '@/components/ui';
 import { Plus, Trash2, GripVertical, Upload } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface HighlightsManagerProps {
   profileData: ProfileData;
@@ -17,8 +33,18 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
   const [showForm, setShowForm] = useState(false);
   const [uploadingIds, setUploadingIds] = useState<Set<string>>(new Set());
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   // Sort highlights by displayOrder
-  const sortedHighlights = [...profileData.highlights].sort((a, b) => a.displayOrder - b.displayOrder);
+  const sortedHighlights = useMemo(
+    () => [...profileData.highlights].sort((a, b) => a.displayOrder - b.displayOrder),
+    [profileData.highlights]
+  );
 
   const handleImageUpload = async (highlightId: string, files: FileList) => {
     try {
@@ -61,7 +87,9 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
       const highlight = profileData.highlights.find((h) => h.id === highlightId);
       if (highlight) {
         const existingImages = highlight.images ?? [];
-        updateHighlight(highlightId, { images: [...existingImages, ...uploadedUrls] });
+        const newImages = [...existingImages, ...uploadedUrls];
+        console.log('Updating highlight images:', { highlightId, existingImages, uploadedUrls, newImages });
+        updateHighlight(highlightId, { images: newImages });
       }
     } catch (error) {
       console.error('Upload error:', error);
@@ -106,10 +134,13 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
   };
 
   const updateHighlight = (highlightId: string, updates: Partial<Highlight>) => {
+    console.log('Updating highlight:', { highlightId, updates });
+    const updatedHighlights = profileData.highlights.map((highlight) =>
+      highlight.id === highlightId ? { ...highlight, ...updates } : highlight
+    );
+    console.log('Updated highlights:', updatedHighlights);
     onChange({
-      highlights: profileData.highlights.map((highlight) =>
-        highlight.id === highlightId ? { ...highlight, ...updates } : highlight
-      ),
+      highlights: updatedHighlights,
     });
   };
 
@@ -119,15 +150,18 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
     });
   };
 
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
 
-    const items = Array.from(sortedHighlights);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = sortedHighlights.findIndex((h) => h.id === active.id);
+    const newIndex = sortedHighlights.findIndex((h) => h.id === over.id);
+
+    const reorderedHighlights = arrayMove(sortedHighlights, oldIndex, newIndex);
 
     // Update display order
-    const updatedHighlights = items.map((highlight, index) => ({
+    const updatedHighlights = reorderedHighlights.map((highlight, index) => ({
       ...highlight,
       displayOrder: index,
     }));
@@ -156,142 +190,173 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
           />
         )}
 
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable
-            droppableId="highlights-list"
-            isDropDisabled={false}
-            isCombineEnabled={false}
-            ignoreContainerClipping={false}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={sortedHighlights.map((h) => h.id)}
+            strategy={verticalListSortingStrategy}
           >
-            {(provided, snapshot) => (
-              <div
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-                className={`space-y-3 ${snapshot.isDraggingOver ? 'bg-muted' : ''}`}
-              >
-                {profileData.highlights.length === 0 ? (
-                  <p className="text-muted-foreground text-sm text-center py-4">
-                    No highlights added yet
-                  </p>
-                ) : (
-                  sortedHighlights.map((highlight, index) => (
-                    <Draggable key={highlight.id} draggableId={highlight.id} index={index}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          className={`p-3 bg-accent rounded-lg ${
-                            snapshot.isDragging ? 'shadow-lg' : ''
-                          }`}
-                        >
-                          <div className="flex gap-2 mb-2">
-                            <div {...provided.dragHandleProps} className="flex items-center">
-                              <GripVertical className="w-5 h-5 text-muted-foreground" />
-                            </div>
-
-                            <Input
-                              value={highlight.title}
-                              onChange={(e) =>
-                                updateHighlight(highlight.id, { title: e.target.value })
-                              }
-                              placeholder="Title"
-                              className="!mb-0 flex-1"
-                            />
-
-                            <Button
-                              size="sm"
-                              variant="danger"
-                              onClick={() => deleteHighlight(highlight.id)}
-                              className="shrink-0"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-
-                          <Textarea
-                            value={highlight.description || ''}
-                            onChange={(e) =>
-                              updateHighlight(highlight.id, { description: e.target.value })
-                            }
-                            placeholder="Description"
-                            className="!mb-2"
-                            rows={2}
-                          />
-
-                          <div className="space-y-2 mb-2">
-                            <div className="flex gap-2 items-center">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={(e) => {
-                                  const files = e.target.files;
-                                  if (files && files.length > 0) handleImageUpload(highlight.id, files);
-                                }}
-                                className="hidden"
-                                id={`image-upload-${highlight.id}`}
-                                disabled={uploadingIds.has(highlight.id)}
-                              />
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  document.getElementById(`image-upload-${highlight.id}`)?.click()
-                                }
-                                disabled={uploadingIds.has(highlight.id)}
-                              >
-                                <Upload className="w-4 h-4 mr-1" />
-                                {uploadingIds.has(highlight.id) ? 'Uploading...' : 'Upload Images'}
-                              </Button>
-                            </div>
-
-                            {/* Display uploaded images */}
-                            {highlight.images && highlight.images.length > 0 && (
-                              <div className="flex gap-2 flex-wrap mt-2">
-                                {(highlight.images ?? []).map((imageUrl, imgIndex) => (
-                                  <div key={imageUrl} className="relative group">
-                                    <img
-                                      src={imageUrl}
-                                      alt={`${highlight.title} ${imgIndex + 1}`}
-                                      className="w-20 h-20 object-cover rounded border-2 border-gray-300 dark:border-gray-600"
-                                      onError={(e) => {
-                                        e.currentTarget.src = 'https://via.placeholder.com/80';
-                                      }}
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => removeImage(highlight.id, imageUrl)}
-                                      className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-
-                          <Input
-                            value={highlight.url || ''}
-                            onChange={(e) =>
-                              updateHighlight(highlight.id, { url: e.target.value })
-                            }
-                            placeholder="Project URL (optional)"
-                            className="!mb-0"
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))
-                )}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+            <div className="space-y-3">
+              {sortedHighlights.length === 0 ? (
+                <p className="text-muted-foreground text-sm text-center py-4">
+                  No highlights added yet
+                </p>
+              ) : (
+                sortedHighlights.map((highlight) => (
+                  <SortableHighlightItem
+                    key={highlight.id}
+                    highlight={highlight}
+                    uploadingIds={uploadingIds}
+                    onUpdate={updateHighlight}
+                    onDelete={deleteHighlight}
+                    onImageUpload={handleImageUpload}
+                    onRemoveImage={removeImage}
+                  />
+                ))
+              )}
+            </div>
+          </SortableContext>
+        </DndContext>
       </CardContent>
     </Card>
+  );
+}
+
+function SortableHighlightItem({
+  highlight,
+  uploadingIds,
+  onUpdate,
+  onDelete,
+  onImageUpload,
+  onRemoveImage,
+}: {
+  highlight: Highlight;
+  uploadingIds: Set<string>;
+  onUpdate: (highlightId: string, updates: Partial<Highlight>) => void;
+  onDelete: (highlightId: string) => void;
+  onImageUpload: (highlightId: string, files: FileList) => void;
+  onRemoveImage: (highlightId: string, imageUrl: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: highlight.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`p-3 bg-accent rounded-lg ${
+        isDragging ? 'shadow-lg opacity-50 z-50' : ''
+      }`}
+    >
+      <div className="flex gap-2 mb-2">
+        <div
+          {...attributes}
+          {...listeners}
+          className="flex items-center cursor-grab active:cursor-grabbing"
+        >
+          <GripVertical className="w-5 h-5 text-muted-foreground" />
+        </div>
+
+        <Input
+          value={highlight.title}
+          onChange={(e) => onUpdate(highlight.id, { title: e.target.value })}
+          placeholder="Title"
+          className="!mb-0 flex-1"
+        />
+
+        <Button
+          size="sm"
+          variant="danger"
+          onClick={() => onDelete(highlight.id)}
+          className="shrink-0"
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+
+      <Textarea
+        value={highlight.description || ''}
+        onChange={(e) => onUpdate(highlight.id, { description: e.target.value })}
+        placeholder="Description"
+        className="!mb-2"
+        rows={2}
+      />
+
+      <div className="space-y-2 mb-2">
+        <div className="flex gap-2 items-center">
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => {
+              const files = e.target.files;
+              if (files && files.length > 0) onImageUpload(highlight.id, files);
+            }}
+            className="hidden"
+            id={`image-upload-${highlight.id}`}
+            disabled={uploadingIds.has(highlight.id)}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              document.getElementById(`image-upload-${highlight.id}`)?.click()
+            }
+            disabled={uploadingIds.has(highlight.id)}
+          >
+            <Upload className="w-4 h-4 mr-1" />
+            {uploadingIds.has(highlight.id) ? 'Uploading...' : 'Upload Images'}
+          </Button>
+        </div>
+
+        {/* Display uploaded images */}
+        {highlight.images && highlight.images.length > 0 && (
+          <div className="flex gap-2 flex-wrap mt-2">
+            {(highlight.images ?? []).map((imageUrl, imgIndex) => (
+              <div key={imageUrl} className="relative group">
+                <img
+                  src={imageUrl}
+                  alt={`${highlight.title} ${imgIndex + 1}`}
+                  className="w-20 h-20 object-cover rounded border-2 border-gray-300 dark:border-gray-600"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://via.placeholder.com/80';
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => onRemoveImage(highlight.id, imageUrl)}
+                  className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Input
+        value={highlight.url || ''}
+        onChange={(e) => onUpdate(highlight.id, { url: e.target.value })}
+        placeholder="Project URL (optional)"
+        className="!mb-0"
+      />
+    </div>
   );
 }
 

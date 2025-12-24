@@ -14,6 +14,8 @@ export const LinksSection = memo(function LinksSection({ links }: LinksSectionPr
   // Sort links by displayOrder
   const sortedLinks = [...links].sort((a, b) => a.displayOrder - b.displayOrder);
 
+  console.log('Links in preview:', sortedLinks.map(l => ({ label: l.label, favicon: l.favicon })));
+
   return (
     <div className="p-8 border-b border-border">
       <div className="flex flex-wrap gap-3 justify-center">
@@ -29,8 +31,9 @@ export const LinksSection = memo(function LinksSection({ links }: LinksSectionPr
               <img
                 src={link.favicon}
                 alt=""
-                className="w-4 h-4 object-contain"
+                className="w-4 h-4 object-contain flex-shrink-0"
                 onError={(e) => {
+                  console.error('Failed to load favicon:', link.favicon);
                   e.currentTarget.style.display = 'none';
                 }}
               />

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const ProfilePhotoSchema = z.object({
   type: z.enum(['url', 'placeholder', 'uploaded']),
-  value: z.string().url(),
+  value: z.string(),
 });
 
 export const LinkSchema = z.object({
@@ -11,13 +11,14 @@ export const LinkSchema = z.object({
   url: z.string().url(),
   icon: z.string(),
   displayOrder: z.number().int().min(0),
+  favicon: z.string().url().optional(),
 });
 
 export const HighlightSchema = z.object({
   id: z.string(),
   title: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
-  image: z.string().url().optional(),
+  images: z.array(z.string().url()).optional(),
   url: z.string().url().optional(),
   displayOrder: z.number().int().min(0),
   category: z.string().optional(),

@@ -16,8 +16,7 @@ export interface Highlight {
   id: string;
   title: string;
   description?: string;
-  image?: string; // Keep for backward compatibility
-  images?: string[]; // New: support multiple images
+  images?: string[];
   url?: string;
   displayOrder: number;
   category?: string;
