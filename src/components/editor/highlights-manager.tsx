@@ -466,11 +466,8 @@ function SortableImageItem({
       style={style}
       className={`relative group ${isDragging ? 'z-50 opacity-50' : ''}`}
     >
-      <div
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing relative"
-      >
+      {/* Image container */}
+      <div className="relative">
         <img
           src={imageUrl}
           alt={highlightTitle}
@@ -480,6 +477,16 @@ function SortableImageItem({
             e.currentTarget.src = 'https://via.placeholder.com/128x72';
           }}
         />
+        
+        {/* Drag handle overlay */}
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute top-1 left-1 p-1 bg-black/30 rounded cursor-grab active:cursor-grabbing"
+        >
+          <GripVertical className="w-4 h-4 text-white" />
+        </div>
+        
         {/* Edit overlay */}
         <button
           type="button"
@@ -522,7 +529,7 @@ function SortableImageItem({
               onEdit('', '');
             }
           }}
-          className="absolute inset-0 flex items-center justify-center bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10"
+          className="absolute inset-0 flex items-center justify-center bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity z-20"
         >
           <Edit className="w-5 h-5 text-white" />
         </button>
