@@ -240,9 +240,18 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
                     onFileSelect={handleFileSelect}
                     onRemoveImage={removeImage}
                     onImageDragEnd={handleImageDragEnd}
-                    onImageEdit={(imageData, existingImageUrl) => 
-                      setImageToCrop({ highlightId: highlight.id, imageData, existingImageUrl })
-                    }
+                    onImageEdit={(imageData, existingImageUrl) => {
+                      if (imageData === 'loading') {
+                        // Show modal with loading state
+                        setImageToCrop({ highlightId: highlight.id, imageData: '', existingImageUrl });
+                      } else if (imageData === '') {
+                        // Close modal
+                        setImageToCrop(null);
+                      } else {
+                        // Update with actual image data
+                        setImageToCrop({ highlightId: highlight.id, imageData, existingImageUrl });
+                      }
+                    }}
                   />
                 ))
               )}
@@ -260,13 +269,22 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
         title="Crop Image"
         size="lg"
       >
-        <ImageCropper
-          image={imageToCrop.imageData}
-          onCropComplete={(blob) => handleCropComplete(imageToCrop.highlightId, blob, imageToCrop.existingImageUrl)}
-          onCancel={() => setImageToCrop(null)}
-          aspect={16 / 9}
-          cropShape="rect"
-        />
+        {imageToCrop.imageData ? (
+          <ImageCropper
+            image={imageToCrop.imageData}
+            onCropComplete={(blob) => handleCropComplete(imageToCrop.highlightId, blob, imageToCrop.existingImageUrl)}
+            onCancel={() => setImageToCrop(null)}
+            aspect={16 / 9}
+            cropShape="rect"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading image...</p>
+            </div>
+          </div>
+        )}
       </Modal>
     )}
   </>
@@ -305,10 +323,6 @@ function SortableHighlightItem({
     transform: CSS.Transform.toString(transform),
     transition,
   };
-
-  function setImageToCrop(arg0: { highlightId: string; imageData: string; }) {
-    throw new Error('Function not implemented.');
-  }
 
   return (
     <div
@@ -392,7 +406,7 @@ function SortableHighlightItem({
                     imageUrl={imageUrl}
                     highlightTitle={highlight.title}
                     onRemove={() => onRemoveImage(highlight.id, imageUrl)}
-                    onEdit={(imageData) => onImageEdit(imageData, imageUrl)}
+                    onEdit={(imageData, existingUrl) => onImageEdit(imageData, existingUrl)}
                   />
                 ))}
               </div>
@@ -420,7 +434,7 @@ function SortableImageItem({
   imageUrl: string;
   highlightTitle: string;
   onRemove: () => void;
-  onEdit: (imageData: string) => void;
+  onEdit: (imageData: string, existingImageUrl: string) => void;
 }) {
   const {
     attributes,
@@ -450,9 +464,10 @@ function SortableImageItem({
         <img
           src={imageUrl}
           alt={highlightTitle}
-          className="w-20 h-20 object-cover rounded border-2 border-gray-300 dark:border-gray-600"
+          className="w-32 h-18 object-cover rounded border-2 border-gray-300 dark:border-gray-600"
+          style={{ aspectRatio: '16/9' }}
           onError={(e) => {
-            e.currentTarget.src = 'https://via.placeholder.com/80';
+            e.currentTarget.src = 'https://via.placeholder.com/128x72';
           }}
         />
         {/* Edit overlay */}
@@ -460,6 +475,10 @@ function SortableImageItem({
           type="button"
           onClick={async (e) => {
             e.stopPropagation();
+            
+            // Open modal immediately with a loading placeholder
+            onEdit('loading', imageUrl);
+            
             try {
               // Use proxy to avoid CORS issues
               const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
@@ -472,7 +491,8 @@ function SortableImageItem({
               const blob = await response.blob();
               const reader = new FileReader();
               reader.onload = () => {
-                onEdit(reader.result as string);
+                // Update the modal with the actual image data
+                onEdit(reader.result as string, imageUrl);
               };
               reader.onerror = () => {
                 throw new Error('Failed to read image');
@@ -481,6 +501,8 @@ function SortableImageItem({
             } catch (error) {
               console.error('Failed to load image for editing:', error);
               alert('Unable to edit this image. Please delete it and upload a new one.');
+              // Close the modal
+              onEdit('', '');
             }
           }}
           className="absolute inset-0 flex items-center justify-center bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
