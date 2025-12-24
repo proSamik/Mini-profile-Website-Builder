@@ -3,6 +3,7 @@ import { createProfile, updateProfileData } from '@/lib/db/mutations';
 import { getProfileByUserId, checkUsernameAvailability } from '@/lib/db/queries';
 import { ProfileDataSchema } from '@/lib/validations/profile';
 import { ProfileData } from '@/types/profile';
+import { requireAuth } from '@/lib/auth/api-auth';
 
 // GET /api/profiles?userId=xxx - Get profile by user ID
 export async function GET(request: NextRequest) {
@@ -29,9 +30,17 @@ export async function GET(request: NextRequest) {
 
 // POST /api/profiles - Create a new profile
 export async function POST(request: NextRequest) {
+  const { error, session } = await requireAuth();
+  if (error) return error;
+
   try {
     const body = await request.json();
     const { userId, username, profileData } = body;
+
+    // Ensure user can only create their own profile
+    if (userId !== session!.user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
 
     if (!userId || !username || !profileData) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -63,9 +72,17 @@ export async function POST(request: NextRequest) {
 
 // PUT /api/profiles - Update profile
 export async function PUT(request: NextRequest) {
+  const { error, session } = await requireAuth();
+  if (error) return error;
+
   try {
     const body = await request.json();
     const { userId, profileData } = body;
+
+    // Ensure user can only update their own profile
+    if (userId !== session!.user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
 
     if (!userId || !profileData) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });

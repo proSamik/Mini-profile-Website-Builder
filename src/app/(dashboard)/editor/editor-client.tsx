@@ -6,13 +6,14 @@ import { UIEditor } from '@/components/editor/ui-editor';
 import { JSONEditor } from '@/components/editor/json-editor';
 import { LivePreview } from '@/components/preview/live-preview';
 import { Button, ThemeToggle } from '@/components/ui';
-import { Code, Paintbrush, Save, Loader2 } from 'lucide-react';
+import { Code, Paintbrush, Save, Loader2, LogOut } from 'lucide-react';
+import { signOut } from 'next-auth/react';
 
-// For demo purposes, we'll use a hardcoded userId
-// In a real app, this would come from authentication
-const DEMO_USER_ID = 'demo-user-123';
+interface EditorClientProps {
+  userId: string;
+}
 
-export default function Home() {
+export function EditorClient({ userId }: EditorClientProps) {
   const [viewMode, setViewMode] = useState<'split' | 'editor' | 'preview'>('split');
   const [editorMode, setEditorMode] = useState<'ui' | 'json'>('ui');
 
@@ -24,7 +25,7 @@ export default function Home() {
     loading,
     saving,
     hasUnsavedChanges,
-  } = useProfile(DEMO_USER_ID);
+  } = useProfile(userId);
 
   if (loading) {
     return (
@@ -120,6 +121,17 @@ export default function Home() {
 
               {/* Theme Toggle */}
               <ThemeToggle />
+
+              {/* Logout Button */}
+              <Button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </Button>
             </div>
           </div>
         </div>
@@ -128,15 +140,38 @@ export default function Home() {
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="container mx-auto px-4 py-8">
-        {viewMode === 'split' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Editor Panel */}
-            <div>
+          {viewMode === 'split' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Editor Panel */}
+              <div>
+                {editorMode === 'ui' ? (
+                  <UIEditor
+                    profileData={profileData}
+                    onChange={updateProfileData}
+                    userId={userId}
+                  />
+                ) : (
+                  <JSONEditor
+                    profileData={profileData}
+                    onChange={replaceProfileData}
+                  />
+                )}
+              </div>
+
+              {/* Preview Panel */}
+              <div>
+                <LivePreview profileData={profileData} />
+              </div>
+            </div>
+          )}
+
+          {viewMode === 'editor' && (
+            <div className="max-w-4xl mx-auto">
               {editorMode === 'ui' ? (
                 <UIEditor
                   profileData={profileData}
                   onChange={updateProfileData}
-                  userId={DEMO_USER_ID}
+                  userId={userId}
                 />
               ) : (
                 <JSONEditor
@@ -145,36 +180,13 @@ export default function Home() {
                 />
               )}
             </div>
+          )}
 
-            {/* Preview Panel */}
-            <div>
+          {viewMode === 'preview' && (
+            <div className="max-w-4xl mx-auto">
               <LivePreview profileData={profileData} />
             </div>
-          </div>
-        )}
-
-        {viewMode === 'editor' && (
-          <div className="max-w-4xl mx-auto">
-            {editorMode === 'ui' ? (
-              <UIEditor
-                profileData={profileData}
-                onChange={updateProfileData}
-                userId={DEMO_USER_ID}
-              />
-            ) : (
-              <JSONEditor
-                profileData={profileData}
-                onChange={replaceProfileData}
-              />
-            )}
-          </div>
-        )}
-
-        {viewMode === 'preview' && (
-          <div className="max-w-4xl mx-auto">
-            <LivePreview profileData={profileData} />
-          </div>
-        )}
+          )}
         </div>
       </div>
     </div>

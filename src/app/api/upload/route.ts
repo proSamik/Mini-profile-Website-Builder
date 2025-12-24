@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPresignedUploadUrl } from '@/lib/storage';
+import { requireAuth } from '@/lib/auth/api-auth';
 
 // POST /api/upload - Get presigned URL for direct upload to R2
 export async function POST(request: NextRequest) {
+  const { error, session } = await requireAuth();
+  if (error) return error;
+
   try {
     const body = await request.json();
     const { userId, fileName, contentType } = body;
+
+    // Ensure user can only upload for their own account
+    if (userId !== session!.user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
 
     if (!userId || !fileName || !contentType) {
       return NextResponse.json(

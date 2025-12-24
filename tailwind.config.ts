@@ -39,6 +39,31 @@ const config: Config = {
           foreground: 'var(--secondary-foreground)',
         },
       },
+      backgroundImage: {
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-secondary': 'var(--gradient-secondary)',
+        'gradient-accent': 'var(--gradient-accent)',
+        'gradient-warm': 'var(--gradient-warm)',
+      },
+      boxShadow: {
+        'glow-purple': 'var(--glow-purple)',
+        'glow-pink': 'var(--glow-pink)',
+        'glow-blue': 'var(--glow-blue)',
+      },
+      animation: {
+        'marquee': 'marquee 30s linear infinite',
+        'shimmer': 'shimmer 2s linear infinite',
+      },
+      keyframes: {
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-1000px 0' },
+          '100%': { backgroundPosition: '1000px 0' },
+        },
+      },
     },
   },
   plugins: [],

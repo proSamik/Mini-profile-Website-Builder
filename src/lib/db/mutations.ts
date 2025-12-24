@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { db } from './client';
-import { profiles } from './schema';
+import { profiles, users } from './schema';
 import { ProfileData } from '@/types/profile';
 
 export async function createProfile(userId: string, username: string, profileData: ProfileData) {
@@ -73,4 +73,34 @@ export async function updateProfileData(userId: string, profileData: ProfileData
 
 export async function deleteProfile(userId: string) {
   await db.delete(profiles).where(eq(profiles.userId, userId));
+}
+
+export async function createUser(username: string, passwordHash: string) {
+  const id = nanoid();
+
+  const [newUser] = await db
+    .insert(users)
+    .values({
+      id,
+      username,
+      passwordHash,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .returning();
+
+  return newUser;
+}
+
+export async function updateUserPassword(userId: string, newPasswordHash: string) {
+  const [updatedUser] = await db
+    .update(users)
+    .set({
+      passwordHash: newPasswordHash,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, userId))
+    .returning();
+
+  return updatedUser;
 }
