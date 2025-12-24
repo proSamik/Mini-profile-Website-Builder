@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Profile } from '@/lib/db/schema';
 import { ProfileData } from '@/types/profile';
 
@@ -14,10 +15,13 @@ export function ProfileCardMini({ profile }: ProfileCardMiniProps) {
       <div className="rounded-2xl p-6 transition-all duration-300 h-full bg-card/80 backdrop-blur-xl border border-border/50 hover:bg-card/90 hover:shadow-glow-purple hover:scale-[1.02]">
         <div className="flex items-center gap-4 mb-4">
           {data.profilePhoto.type === 'uploaded' || data.profilePhoto.type === 'url' ? (
-            <img
+            <Image
               src={data.profilePhoto.value}
               alt={data.displayName}
+              width={64}
+              height={64}
               className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+              unoptimized={data.profilePhoto.value.includes('r2.dev')}
             />
           ) : (
             <div className="w-16 h-16 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">

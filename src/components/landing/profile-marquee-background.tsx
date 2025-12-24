@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Profile } from '@/lib/db/schema';
 import { ProfileData } from '@/types/profile';
 import { Marquee } from '@/components/ui/marquee';
@@ -37,10 +38,13 @@ export function ProfileMarqueeBackground() {
         )}>
           <div className="flex items-center gap-4">
             {data.profilePhoto.type === 'uploaded' || data.profilePhoto.type === 'url' ? (
-              <img
+              <Image
                 src={data.profilePhoto.value}
                 alt={data.displayName}
+                width={48}
+                height={48}
                 className="w-12 h-12 rounded-full object-cover"
+                unoptimized={data.profilePhoto.value.includes('r2.dev')}
               />
             ) : (
               <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-xl">
