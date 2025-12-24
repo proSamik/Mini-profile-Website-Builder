@@ -25,9 +25,9 @@ export function UIEditor({ profileData, onChange, userId, onUsernameValidChange 
         onUsernameValidChange={onUsernameValidChange}
       />
       <PhotoUploader profileData={profileData} onChange={onChange} userId={userId} />
-      <LayoutSelector profileData={profileData} onChange={onChange} />
       <LinksManager profileData={profileData} onChange={onChange} />
       <HighlightsManager profileData={profileData} onChange={onChange} userId={userId} />
+      <LayoutSelector profileData={profileData} onChange={onChange} />
     </div>
   );
 }

@@ -92,19 +92,21 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
         {/* Column 1: Photo + Username */}
         <div className="flex flex-col items-center gap-3">
           <ProfilePhoto size="large" />
-          <p className="text-sm text-muted-foreground whitespace-nowrap">
-            @{profileData.username}
-          </p>
+          <div className="bg-muted rounded-lg px-4 py-2">
+            <p className="text-sm text-muted-foreground whitespace-nowrap">
+              @{profileData.username}
+            </p>
+          </div>
         </div>
 
         {/* Column 2: Display Name + Bio */}
         <div className="flex-1 flex flex-col gap-3">
-          <div className="border border-border rounded-lg p-4">
+          <div className="bg-muted rounded-lg p-4">
             <h1 className="text-2xl font-bold text-foreground">
               {profileData.displayName}
             </h1>
           </div>
-          <div className="border border-border rounded-lg p-4">
+          <div className="bg-muted rounded-lg p-4">
             <p className="text-foreground/80 leading-relaxed">
               {profileData.bio}
             </p>
@@ -120,12 +122,12 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
       <div className="flex gap-6 items-start">
         {/* Column 1: Display Name + Bio */}
         <div className="flex-1 flex flex-col gap-3">
-          <div className="border border-border rounded-lg p-4">
+          <div className="bg-muted rounded-lg p-4">
             <h1 className="text-2xl font-bold text-foreground">
               {profileData.displayName}
             </h1>
           </div>
-          <div className="border border-border rounded-lg p-4">
+          <div className="bg-muted rounded-lg p-4">
             <p className="text-foreground/80 leading-relaxed">
               {profileData.bio}
             </p>
@@ -135,9 +137,11 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
         {/* Column 2: Photo + Username */}
         <div className="flex flex-col items-center gap-3">
           <ProfilePhoto size="large" />
-          <p className="text-sm text-muted-foreground whitespace-nowrap">
-            @{profileData.username}
-          </p>
+          <div className="bg-muted rounded-lg px-4 py-2">
+            <p className="text-sm text-muted-foreground whitespace-nowrap">
+              @{profileData.username}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -154,12 +158,12 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
 
         {/* Column 2: Display Name + Username (split into 2 rows) */}
         <div className="flex-1 flex flex-col gap-3">
-          <div className="border border-border rounded-lg p-4">
+          <div className="bg-muted rounded-lg p-4">
             <h1 className="text-2xl font-bold text-foreground">
               {profileData.displayName}
             </h1>
           </div>
-          <div className="border border-border rounded-lg px-4 py-2">
+          <div className="bg-muted rounded-lg px-4 py-2">
             <p className="text-sm text-muted-foreground">
               @{profileData.username}
             </p>
@@ -186,7 +190,7 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
           <div className="flex justify-center">
             <ProfilePhoto size="large" />
           </div>
-          <div className="border border-border rounded-lg px-4 py-2 text-center">
+          <div className="bg-muted rounded-lg px-4 py-2 text-center">
             <p className="text-sm text-muted-foreground">
               @{profileData.username}
             </p>
@@ -195,12 +199,12 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
 
         {/* Column 2: Display Name + Bio */}
         <div className="flex-1 flex flex-col gap-3">
-          <div className="border border-border rounded-lg p-4">
+          <div className="bg-muted rounded-lg p-4">
             <h1 className="text-2xl font-bold text-foreground">
               {profileData.displayName}
             </h1>
           </div>
-          <div className="border border-border rounded-lg p-4">
+          <div className="bg-muted rounded-lg p-4">
             <p className="text-foreground/80 leading-relaxed">
               {profileData.bio}
             </p>

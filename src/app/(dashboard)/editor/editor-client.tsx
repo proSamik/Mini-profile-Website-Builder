@@ -163,8 +163,8 @@ export function EditorClient({ userId }: EditorClientProps) {
                 )}
               </div>
 
-              {/* Preview Panel */}
-              <div>
+              {/* Preview Panel - Sticky */}
+              <div className="lg:sticky lg:top-8 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
                 <LivePreview profileData={profileData} />
               </div>
             </div>
