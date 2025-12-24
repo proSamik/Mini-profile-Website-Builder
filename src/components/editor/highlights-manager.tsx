@@ -88,7 +88,6 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
       if (highlight) {
         const existingImages = highlight.images ?? [];
         const newImages = [...existingImages, ...uploadedUrls];
-        console.log('Updating highlight images:', { highlightId, existingImages, uploadedUrls, newImages });
         updateHighlight(highlightId, { images: newImages });
       }
     } catch (error) {
@@ -134,13 +133,10 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
   };
 
   const updateHighlight = (highlightId: string, updates: Partial<Highlight>) => {
-    console.log('Updating highlight:', { highlightId, updates });
-    const updatedHighlights = profileData.highlights.map((highlight) =>
-      highlight.id === highlightId ? { ...highlight, ...updates } : highlight
-    );
-    console.log('Updated highlights:', updatedHighlights);
     onChange({
-      highlights: updatedHighlights,
+      highlights: profileData.highlights.map((highlight) =>
+        highlight.id === highlightId ? { ...highlight, ...updates } : highlight
+      ),
     });
   };
 

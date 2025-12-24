@@ -53,7 +53,12 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
   }, [jsonText, isManualEdit, onChange]);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setJsonText(e.target.value);
+    // Replace smart quotes with regular quotes
+    let value = e.target.value;
+    value = value.replace(/[\u201C\u201D]/g, '"'); // Replace " and "
+    value = value.replace(/[\u2018\u2019]/g, "'"); // Replace ' and '
+    
+    setJsonText(value);
     setIsManualEdit(true);
     setError(null);
     setErrorLine(null);

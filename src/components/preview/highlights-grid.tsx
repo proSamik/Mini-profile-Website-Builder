@@ -29,12 +29,6 @@ export const HighlightsGrid = memo(function HighlightsGrid({ highlights, forceSi
   // Sort highlights by displayOrder
   const sortedHighlights = [...highlights].sort((a, b) => a.displayOrder - b.displayOrder);
 
-  console.log('Highlights in preview:', sortedHighlights.map(h => ({ 
-    title: h.title, 
-    images: h.images, 
-    imageCount: h.images?.length 
-  })));
-
   return (
     <div className="p-8">
       <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
