@@ -482,7 +482,7 @@ function SortableImageItem({
         <div
           {...attributes}
           {...listeners}
-          className="absolute top-1 left-1 p-1 bg-black/30 rounded cursor-grab active:cursor-grabbing"
+          className="absolute top-1 left-1 p-1 bg-black/30 rounded cursor-grab active:cursor-grabbing z-999"
         >
           <GripVertical className="w-4 h-4 text-white" />
         </div>
