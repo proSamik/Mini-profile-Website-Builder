@@ -9,9 +9,17 @@ interface ImageCropperProps {
   image: string;
   onCropComplete: (croppedImage: Blob) => void;
   onCancel: () => void;
+  aspect?: number;
+  cropShape?: 'rect' | 'round';
 }
 
-export function ImageCropper({ image, onCropComplete, onCancel }: ImageCropperProps) {
+export function ImageCropper({ 
+  image, 
+  onCropComplete, 
+  onCancel,
+  aspect = 1,
+  cropShape = 'round'
+}: ImageCropperProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
@@ -100,9 +108,9 @@ export function ImageCropper({ image, onCropComplete, onCancel }: ImageCropperPr
           image={image}
           crop={crop}
           zoom={zoom}
-          aspect={1}
-          cropShape="round"
-          showGrid={false}
+          aspect={aspect}
+          cropShape={cropShape}
+          showGrid={cropShape === 'rect'}
           onCropChange={onCropChange}
           onZoomChange={onZoomChange}
           onCropComplete={onCropCompleteCallback}

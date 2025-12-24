@@ -23,6 +23,7 @@ export const LinksSection = memo(function LinksSection({ links }: LinksSectionPr
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
+            title={link.label}
             className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium bg-primary text-primary-foreground transition-all hover:shadow-lg hover:scale-105"
           >
             {link.favicon ? (

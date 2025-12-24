@@ -3,7 +3,8 @@
 import { useState, useMemo } from 'react';
 import { nanoid } from 'nanoid';
 import { ProfileData, Highlight } from '@/types/profile';
-import { Card, CardHeader, CardTitle, CardContent, Input, Textarea, Button } from '@/components/ui';
+import { Card, CardHeader, CardTitle, CardContent, Input, Textarea, Button, Modal } from '@/components/ui';
+import { ImageCropper } from '@/components/ui/image-cropper';
 import { Plus, Trash2, GripVertical, Upload } from 'lucide-react';
 import {
   DndContext,
@@ -20,6 +21,7 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
+  horizontalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -32,6 +34,7 @@ interface HighlightsManagerProps {
 export function HighlightsManager({ profileData, onChange, userId }: HighlightsManagerProps) {
   const [showForm, setShowForm] = useState(false);
   const [uploadingIds, setUploadingIds] = useState<Set<string>>(new Set());
+  const [imageToCrop, setImageToCrop] = useState<{ highlightId: string; imageData: string } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -46,53 +49,60 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
     [profileData.highlights]
   );
 
-  const handleImageUpload = async (highlightId: string, files: FileList) => {
+  const handleFileSelect = (highlightId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageToCrop({ highlightId, imageData: reader.result as string });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = async (highlightId: string, croppedBlob: Blob) => {
     try {
       setUploadingIds((prev) => new Set(prev).add(highlightId));
 
-      const uploadPromises = Array.from(files).map(async (file) => {
-        // Get presigned URL
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            fileName: file.name,
-            contentType: file.type,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to get upload URL');
-        }
-
-        const { uploadUrl, publicUrl } = await response.json();
-
-        // Upload to R2
-        const uploadResponse = await fetch(uploadUrl, {
-          method: 'PUT',
-          body: file,
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error('Failed to upload file');
-        }
-
-        return publicUrl;
+      // Get presigned URL
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          fileName: `highlight-${Date.now()}.jpg`,
+          contentType: 'image/jpeg',
+        }),
       });
 
-      const uploadedUrls = await Promise.all(uploadPromises);
+      if (!response.ok) {
+        throw new Error('Failed to get upload URL');
+      }
 
-      // Find the highlight and add the new images
+      const { uploadUrl, publicUrl } = await response.json();
+
+      // Upload to R2
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: croppedBlob,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      // Find the highlight and add the new image
       const highlight = profileData.highlights.find((h) => h.id === highlightId);
       if (highlight) {
         const existingImages = highlight.images ?? [];
-        const newImages = [...existingImages, ...uploadedUrls];
+        const newImages = [...existingImages, publicUrl];
         updateHighlight(highlightId, { images: newImages });
       }
+
+      setImageToCrop(null);
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Failed to upload image(s)');
+      alert('Failed to upload image');
     } finally {
       setUploadingIds((prev) => {
         const next = new Set(prev);
@@ -110,14 +120,19 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
     }
   };
 
-  const reorderImages = (highlightId: string, startIndex: number, endIndex: number) => {
+  const handleImageDragEnd = (highlightId: string, event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
     const highlight = profileData.highlights.find((h) => h.id === highlightId);
-    if (highlight?.images) {
-      const images = Array.from(highlight.images);
-      const [removed] = images.splice(startIndex, 1);
-      images.splice(endIndex, 0, removed);
-      updateHighlight(highlightId, { images });
-    }
+    if (!highlight?.images) return;
+
+    const oldIndex = highlight.images.findIndex((img) => img === active.id);
+    const newIndex = highlight.images.findIndex((img) => img === over.id);
+
+    const reorderedImages = arrayMove(highlight.images, oldIndex, newIndex);
+    updateHighlight(highlightId, { images: reorderedImages });
   };
 
   const addHighlight = (highlightData: Omit<Highlight, 'id' | 'displayOrder'>) => {
@@ -166,15 +181,16 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Highlights</CardTitle>
-        <Button size="sm" onClick={() => setShowForm(true)}>
-          <Plus className="w-4 h-4 mr-1" />
-          Add Highlight
-        </Button>
-      </CardHeader>
-      <CardContent>
+    <>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Highlights</CardTitle>
+          <Button size="sm" onClick={() => setShowForm(true)}>
+            <Plus className="w-4 h-4 mr-1" />
+            Add Highlight
+          </Button>
+        </CardHeader>
+        <CardContent>
         {showForm && (
           <HighlightForm
             onSubmit={(highlight) => {
@@ -208,8 +224,9 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
                     uploadingIds={uploadingIds}
                     onUpdate={updateHighlight}
                     onDelete={deleteHighlight}
-                    onImageUpload={handleImageUpload}
+                    onFileSelect={handleFileSelect}
                     onRemoveImage={removeImage}
+                    onImageDragEnd={handleImageDragEnd}
                   />
                 ))
               )}
@@ -218,6 +235,25 @@ export function HighlightsManager({ profileData, onChange, userId }: HighlightsM
         </DndContext>
       </CardContent>
     </Card>
+
+    {/* Image Cropper Modal */}
+    {imageToCrop && (
+      <Modal
+        isOpen={true}
+        onClose={() => setImageToCrop(null)}
+        title="Crop Image"
+        size="lg"
+      >
+        <ImageCropper
+          image={imageToCrop.imageData}
+          onCropComplete={(blob) => handleCropComplete(imageToCrop.highlightId, blob)}
+          onCancel={() => setImageToCrop(null)}
+          aspect={16 / 9}
+          cropShape="rect"
+        />
+      </Modal>
+    )}
+  </>
   );
 }
 
@@ -226,15 +262,17 @@ function SortableHighlightItem({
   uploadingIds,
   onUpdate,
   onDelete,
-  onImageUpload,
+  onFileSelect,
   onRemoveImage,
+  onImageDragEnd,
 }: {
   highlight: Highlight;
   uploadingIds: Set<string>;
   onUpdate: (highlightId: string, updates: Partial<Highlight>) => void;
   onDelete: (highlightId: string) => void;
-  onImageUpload: (highlightId: string, files: FileList) => void;
+  onFileSelect: (highlightId: string, e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (highlightId: string, imageUrl: string) => void;
+  onImageDragEnd: (highlightId: string, event: DragEndEvent) => void;
 }) {
   const {
     attributes,
@@ -297,11 +335,7 @@ function SortableHighlightItem({
           <input
             type="file"
             accept="image/*"
-            multiple
-            onChange={(e) => {
-              const files = e.target.files;
-              if (files && files.length > 0) onImageUpload(highlight.id, files);
-            }}
+            onChange={(e) => onFileSelect(highlight.id, e)}
             className="hidden"
             id={`image-upload-${highlight.id}`}
             disabled={uploadingIds.has(highlight.id)}
@@ -316,33 +350,33 @@ function SortableHighlightItem({
             disabled={uploadingIds.has(highlight.id)}
           >
             <Upload className="w-4 h-4 mr-1" />
-            {uploadingIds.has(highlight.id) ? 'Uploading...' : 'Upload Images'}
+            {uploadingIds.has(highlight.id) ? 'Uploading...' : 'Upload Image'}
           </Button>
         </div>
 
-        {/* Display uploaded images */}
+        {/* Display uploaded images with drag-and-drop reordering */}
         {highlight.images && highlight.images.length > 0 && (
-          <div className="flex gap-2 flex-wrap mt-2">
-            {(highlight.images ?? []).map((imageUrl, imgIndex) => (
-              <div key={imageUrl} className="relative group">
-                <img
-                  src={imageUrl}
-                  alt={`${highlight.title} ${imgIndex + 1}`}
-                  className="w-20 h-20 object-cover rounded border-2 border-gray-300 dark:border-gray-600"
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://via.placeholder.com/80';
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => onRemoveImage(highlight.id, imageUrl)}
-                  className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Trash2 className="w-3 h-3" />
-                </button>
+          <DndContext
+            sensors={[useSensor(PointerSensor)]}
+            collisionDetection={closestCenter}
+            onDragEnd={(event) => onImageDragEnd(highlight.id, event)}
+          >
+            <SortableContext
+              items={highlight.images}
+              strategy={horizontalListSortingStrategy}
+            >
+              <div className="flex gap-2 flex-wrap mt-2">
+                {highlight.images.map((imageUrl) => (
+                  <SortableImageItem
+                    key={imageUrl}
+                    imageUrl={imageUrl}
+                    highlightTitle={highlight.title}
+                    onRemove={() => onRemoveImage(highlight.id, imageUrl)}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+          </DndContext>
         )}
       </div>
 
@@ -352,6 +386,59 @@ function SortableHighlightItem({
         placeholder="Project URL (optional)"
         className="!mb-0"
       />
+    </div>
+  );
+}
+
+function SortableImageItem({
+  imageUrl,
+  highlightTitle,
+  onRemove,
+}: {
+  imageUrl: string;
+  highlightTitle: string;
+  onRemove: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: imageUrl });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative group ${isDragging ? 'z-50 opacity-50' : ''}`}
+      {...attributes}
+      {...listeners}
+    >
+      <img
+        src={imageUrl}
+        alt={highlightTitle}
+        className="w-20 h-20 object-cover rounded border-2 border-gray-300 dark:border-gray-600 cursor-grab active:cursor-grabbing"
+        onError={(e) => {
+          e.currentTarget.src = 'https://via.placeholder.com/80';
+        }}
+      />
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+      >
+        <Trash2 className="w-3 h-3" />
+      </button>
     </div>
   );
 }
