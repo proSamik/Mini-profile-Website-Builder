@@ -36,7 +36,7 @@ export function ProfileMarqueeBackground() {
           "hover:bg-card/90 hover:shadow-glow-purple hover:scale-105"
         )}>
           <div className="flex items-center gap-4">
-            {data.profilePhoto.type === 'url' ? (
+            {data.profilePhoto.type === 'uploaded' || data.profilePhoto.type === 'url' ? (
               <img
                 src={data.profilePhoto.value}
                 alt={data.displayName}

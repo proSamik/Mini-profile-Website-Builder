@@ -34,7 +34,7 @@ export function ProfileMarquee() {
           "glass-card rounded-2xl p-6 hover:shadow-glow-purple hover:scale-105 transition-all duration-300"
         )}>
           <div className="flex items-center gap-4">
-            {data.profilePhoto.type === 'url' ? (
+            {data.profilePhoto.type === 'uploaded' || data.profilePhoto.type === 'url' ? (
               <img
                 src={data.profilePhoto.value}
                 alt={data.displayName}

@@ -13,11 +13,19 @@ export function ProfileCardMini({ profile }: ProfileCardMiniProps) {
     <Link href={`/${profile.username}`}>
       <div className="rounded-2xl p-6 transition-all duration-300 h-full bg-card/80 backdrop-blur-xl border border-border/50 hover:bg-card/90 hover:shadow-glow-purple hover:scale-[1.02]">
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
-            {data.profilePhoto.type === 'placeholder'
-              ? data.profilePhoto.value
-              : data.displayName.charAt(0).toUpperCase()}
-          </div>
+          {data.profilePhoto.type === 'uploaded' || data.profilePhoto.type === 'url' ? (
+            <img
+              src={data.profilePhoto.value}
+              alt={data.displayName}
+              className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+              {data.profilePhoto.type === 'placeholder'
+                ? data.profilePhoto.value
+                : data.displayName.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-lg text-foreground truncate">{data.displayName}</h3>
             <p className="text-muted-foreground truncate">@{profile.username}</p>
