@@ -51,9 +51,6 @@ export function EditorClient({ userId }: EditorClientProps) {
                   Builder
                 </h1>
               </Link>
-              <p className="text-sm text-muted-foreground">
-                Design your personal profile website in real-time
-              </p>
             </div>
 
             <div className="flex flex-wrap gap-2 items-center">
