@@ -15,3 +15,5 @@ export { Modal } from './modal';
 export { Carousel } from './carousel';
 
 export { ThemeToggle } from './theme-toggle';
+
+export { Iphone } from './iphone';
