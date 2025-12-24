@@ -288,6 +288,10 @@ function SortableHighlightItem({
     transition,
   };
 
+  function setImageToCrop(arg0: { highlightId: string; imageData: string; }) {
+    throw new Error('Function not implemented.');
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -371,7 +375,6 @@ function SortableHighlightItem({
                     highlightTitle={highlight.title}
                     onRemove={() => onRemoveImage(highlight.id, imageUrl)}
                     onEdit={(imageData) => {
-                      // Set the image to crop
                       setImageToCrop({ highlightId: highlight.id, imageData });
                     }}
                   />
@@ -439,10 +442,30 @@ function SortableImageItem({
         {/* Edit overlay */}
         <button
           type="button"
-          onClick={(e) => {
+          onClick={async (e) => {
             e.stopPropagation();
-            // Use the image URL directly - the cropper can handle URLs
-            onEdit(imageUrl);
+            try {
+              // Use proxy to avoid CORS issues
+              const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+              const response = await fetch(proxyUrl);
+              
+              if (!response.ok) {
+                throw new Error('Failed to fetch image');
+              }
+              
+              const blob = await response.blob();
+              const reader = new FileReader();
+              reader.onload = () => {
+                onEdit(reader.result as string);
+              };
+              reader.onerror = () => {
+                throw new Error('Failed to read image');
+              };
+              reader.readAsDataURL(blob);
+            } catch (error) {
+              console.error('Failed to load image for editing:', error);
+              alert('Unable to edit this image. Please delete it and upload a new one.');
+            }
           }}
           className="absolute inset-0 flex items-center justify-center bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
         >

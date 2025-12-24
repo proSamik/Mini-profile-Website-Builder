@@ -205,9 +205,32 @@ export function PhotoUploader({ profileData, onChange, userId }: PhotoUploaderPr
                   />
                   <button
                     type="button"
-                    onClick={() => {
-                      // Use the image URL directly - the cropper can handle URLs
-                      setImageToCrop(profileData.profilePhoto.value);
+                    onClick={async () => {
+                      try {
+                        setUploading(true);
+                        // Use proxy to avoid CORS issues
+                        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(profileData.profilePhoto.value)}`;
+                        const response = await fetch(proxyUrl);
+                        
+                        if (!response.ok) {
+                          throw new Error('Failed to fetch image');
+                        }
+                        
+                        const blob = await response.blob();
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          setImageToCrop(reader.result as string);
+                          setUploading(false);
+                        };
+                        reader.onerror = () => {
+                          throw new Error('Failed to read image');
+                        };
+                        reader.readAsDataURL(blob);
+                      } catch (error) {
+                        console.error('Failed to load image for editing:', error);
+                        setUploading(false);
+                        alert('Unable to edit this image. Please remove it and upload a new one.');
+                      }
                     }}
                     className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                   >
