@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState } from 'react';
+import Image from 'next/image';
 import { ProfileData } from '@/types/profile';
 
 interface ProfileCardProps {
@@ -39,9 +40,11 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
       {/* Profile Photo */}
       <div className="mb-6">
         {hasPhoto ? (
-          <img
+          <Image
             src={profileData.profilePhoto.value}
             alt={profileData.displayName}
+            width={128}
+            height={128}
             className="w-32 h-32 rounded-full mx-auto object-cover shadow-lg border-4 border-primary"
             onError={() => setImageError(true)}
           />

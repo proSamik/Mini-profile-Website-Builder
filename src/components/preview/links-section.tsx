@@ -1,6 +1,7 @@
 'use client';
 
 import { memo } from 'react';
+import Image from 'next/image';
 import { Link } from '@/types/profile';
 import { ExternalLink } from 'lucide-react';
 
@@ -27,9 +28,11 @@ export const LinksSection = memo(function LinksSection({ links }: LinksSectionPr
             className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium bg-white text-foreground border-2 border-transparent transition-all hover:border-border hover:shadow-lg hover:scale-105"
           >
             {link.favicon ? (
-              <img
+              <Image
                 src={link.favicon}
                 alt={link.label}
+                width={24}
+                height={24}
                 className="w-6 h-6 object-contain flex-shrink-0"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';

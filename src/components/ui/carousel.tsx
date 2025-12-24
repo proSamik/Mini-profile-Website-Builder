@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import Image from 'next/image';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -42,10 +43,11 @@ export function Carousel({ images, alt }: CarouselProps) {
   if (images.length === 1) {
     return (
       <div className="relative w-full h-48 bg-muted">
-        <img
+        <Image
           src={images[0]}
           alt={alt}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
           onError={(e) => {
             e.currentTarget.style.display = 'none';
           }}
@@ -59,11 +61,12 @@ export function Carousel({ images, alt }: CarouselProps) {
       <div className="overflow-hidden h-full" ref={emblaRef}>
         <div className="flex h-full">
           {images.map((image, index) => (
-            <div key={index} className="flex-[0_0_100%] min-w-0">
-              <img
+            <div key={index} className="flex-[0_0_100%] min-w-0 relative">
+              <Image
                 src={image}
                 alt={`${alt} ${index + 1}`}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                 }}
