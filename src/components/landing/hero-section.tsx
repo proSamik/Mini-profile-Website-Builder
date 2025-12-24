@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ClaimIdForm } from './claim-id-form';
 
 export function HeroSection() {
@@ -9,6 +10,16 @@ export function HeroSection() {
             <span className="gradient-text">Claim Your ID</span>
           </h1>
           <ClaimIdForm />
+
+          <div className="mt-8 pt-6 border-t border-border">
+            <Link
+              href="/profiles"
+              className="text-primary hover:text-primary/80 font-semibold inline-flex items-center gap-2 hover:gap-3 transition-all w-full justify-center"
+            >
+              See other profiles
+              <span>→</span>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
