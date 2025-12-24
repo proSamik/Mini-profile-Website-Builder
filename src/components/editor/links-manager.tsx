@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { nanoid } from 'nanoid';
 import { ProfileData, Link } from '@/types/profile';
 import { Card, CardHeader, CardTitle, CardContent, Input, Button } from '@/components/ui';
@@ -31,6 +31,8 @@ interface LinksManagerProps {
 
 export function LinksManager({ profileData, onChange }: LinksManagerProps) {
   const [showForm, setShowForm] = useState(false);
+  const faviconTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const linksRef = useRef(profileData.links);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -45,11 +47,67 @@ export function LinksManager({ profileData, onChange }: LinksManagerProps) {
     [profileData.links]
   );
 
-  const addLink = (linkData: Omit<Link, 'id' | 'displayOrder'>) => {
+  // Keep ref updated with latest links
+  useEffect(() => {
+    linksRef.current = profileData.links;
+  }, [profileData.links]);
+
+  // Fetch favicons for links that don't have one
+  useEffect(() => {
+    const fetchMissingFavicons = async () => {
+      const linksWithoutFavicons = profileData.links.filter(
+        (link) => link.url && !link.favicon
+      );
+
+      for (const link of linksWithoutFavicons) {
+        try {
+          const favicon = await getFaviconUrl(link.url);
+          if (favicon) {
+            // Update this specific link with the favicon
+            onChange({
+              links: profileData.links.map((l) =>
+                l.id === link.id ? { ...l, favicon } : l
+              ),
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching favicon:', error);
+        }
+      }
+    };
+
+    // Only fetch on initial mount or when links change
+    if (profileData.links.length > 0) {
+      fetchMissingFavicons();
+    }
+  }, [profileData.links.length]); // Only run when the number of links changes
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      faviconTimeouts.current.forEach((timeout) => clearTimeout(timeout));
+    };
+  }, []);
+
+  const addLink = async (linkData: Omit<Link, 'id' | 'displayOrder'>) => {
+    // Fetch favicon for the new link
+    let favicon: string | undefined = undefined;
+    if (linkData.url) {
+      try {
+        const fetchedFavicon = await getFaviconUrl(linkData.url);
+        if (fetchedFavicon) {
+          favicon = fetchedFavicon;
+        }
+      } catch (error) {
+        console.error('Error fetching favicon:', error);
+      }
+    }
+
     const newLink: Link = {
       ...linkData,
       id: nanoid(),
       displayOrder: profileData.links.length,
+      favicon,
     };
 
     onChange({
@@ -57,24 +115,42 @@ export function LinksManager({ profileData, onChange }: LinksManagerProps) {
     });
   };
 
-  const updateLink = async (linkId: string, updates: Partial<Link>) => {
-    // If URL is being updated, fetch the favicon
-    if (updates.url) {
-      try {
-        const favicon = await getFaviconUrl(updates.url);
-        if (favicon) {
-          updates.favicon = favicon;
-        }
-      } catch (error) {
-        console.error('Error fetching favicon:', error);
-      }
-    }
-
+  const updateLink = (linkId: string, updates: Partial<Link>) => {
+    // Update the link immediately with the provided updates
     onChange({
       links: profileData.links.map((link) =>
         link.id === linkId ? { ...link, ...updates } : link
       ),
     });
+
+    // If URL is being updated, fetch the favicon
+    if (updates.url) {
+      // Clear existing timeout for this link
+      const existingTimeout = faviconTimeouts.current.get(linkId);
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+      }
+
+      // Set new timeout to fetch favicon after 1 second of no changes
+      const timeout = setTimeout(async () => {
+        try {
+          const favicon = await getFaviconUrl(updates.url!);
+          if (favicon) {
+            const updatedLinks = linksRef.current.map((link) =>
+              link.id === linkId ? { ...link, favicon } : link
+            );
+            onChange({
+              links: updatedLinks,
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching favicon:', error);
+        }
+        faviconTimeouts.current.delete(linkId);
+      }, 1000);
+
+      faviconTimeouts.current.set(linkId, timeout);
+    }
   };
 
   const deleteLink = (linkId: string) => {

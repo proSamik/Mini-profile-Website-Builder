@@ -11,31 +11,26 @@ export async function GET(request: NextRequest) {
   try {
     // Validate URL
     const urlObj = new URL(url);
+    const domain = urlObj.hostname;
     
-    // Use favicone.com API
-    const faviconeUrl = `https://favicone.com/${urlObj.hostname}`;
-    const response = await fetch(faviconeUrl);
+    // Try DuckDuckGo's favicon service (reliable and fast)
+    const duckduckgoUrl = `https://icons.duckduckgo.com/ip3/${domain}.ico`;
     
-    if (response.ok) {
-      const data = await response.json();
-      if (data.hasIcon && data.icon) {
-        return NextResponse.json({ favicon: data.icon });
-      }
-    }
-    
-    // Fallback to Google's favicon service
-    const faviconUrl = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
-    return NextResponse.json({ favicon: faviconUrl });
-  } catch (error) {
-    console.error('Error fetching favicon:', error);
-    
-    // Try to extract domain and use Google's service as fallback
     try {
-      const urlObj = new URL(url);
-      const faviconUrl = `https://www.google.com/s2/favicons?domain=${urlObj.hostname}&sz=64`;
-      return NextResponse.json({ favicon: faviconUrl });
-    } catch {
-      return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
+      const ddgResponse = await fetch(duckduckgoUrl, { method: 'HEAD' });
+      if (ddgResponse.ok) {
+        return NextResponse.json({ favicon: duckduckgoUrl });
+      }
+    } catch (e) {
+      // Fallback to Google
     }
+    
+    // Try Google's favicon service as fallback
+    const googleUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+    return NextResponse.json({ favicon: googleUrl });
+    
+  } catch (error) {
+    console.error('Error in favicon API:', error);
+    return NextResponse.json({ error: 'Invalid URL' }, { status: 400 });
   }
 }
