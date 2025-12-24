@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { db } from '../src/lib/db/client';
 import { profiles, users } from '../src/lib/db/schema';
 import { hashPassword } from '../src/lib/auth/password';
-import { ProfileData } from '../src/types/profile';
+import { ProfileData, ProfileLayout, ProfileTheme } from '../src/types/profile';
 
 const PASSWORD = 'NextHash#2025';
 
@@ -353,8 +353,8 @@ async function seedDatabase() {
           displayOrder: index,
           category: highlight.category,
         })),
-        layout: data.layout,
-        theme: data.theme,
+        layout: data.layout as ProfileLayout,
+        theme: data.theme as ProfileTheme,
       };
 
       // Create profile
