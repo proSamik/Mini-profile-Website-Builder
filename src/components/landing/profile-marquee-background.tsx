@@ -61,8 +61,8 @@ export function ProfileMarqueeBackground() {
   };
 
   return (
-    <div className="absolute inset-0 z-0">
-      <div className="relative flex h-full w-full flex-row items-center justify-center gap-4 overflow-hidden [perspective:300px]">
+    <div className="absolute inset-0 z-0 overflow-hidden">
+      <div className="relative flex h-full w-full flex-row items-center justify-center gap-4 [perspective:300px] scale-[2]">
         <div
           className="flex flex-row items-center gap-4"
           style={{
@@ -91,13 +91,13 @@ export function ProfileMarqueeBackground() {
             ))}
           </Marquee>
         </div>
-
-        {/* Gradient overlays for fade effect */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-background"></div>
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-background"></div>
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-background"></div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background"></div>
       </div>
+
+      {/* Gradient overlays for fade effect - with pointer-events-none */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-background z-10"></div>
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-background z-10"></div>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-background z-10"></div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-background z-10"></div>
     </div>
   );
 }
