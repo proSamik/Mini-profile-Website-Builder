@@ -17,11 +17,11 @@ export function ProfileMarquee() {
 
   if (profiles.length === 0) return null;
 
-  // Duplicate profiles for seamless infinite scroll
-  const displayProfiles = [...profiles, ...profiles];
+  // Duplicate profiles for seamless infinite scroll only if we have enough profiles
+  const displayProfiles = profiles.length >= 3 ? [...profiles, ...profiles] : profiles;
 
   return (
-    <section className="py-12 overflow-hidden">
+    <section className="pt-6 pb-12 overflow-hidden">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-foreground">Recently Created Profiles</h2>
         <p className="text-muted-foreground mt-2">Join our growing community</p>
@@ -39,11 +39,19 @@ export function ProfileMarquee() {
               >
                 <div className="glass-card rounded-2xl p-6 hover:shadow-glow-purple hover:scale-105 transition-all duration-300">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-xl">
-                      {data.profilePhoto.type === 'placeholder'
-                        ? data.profilePhoto.value
-                        : data.displayName.charAt(0).toUpperCase()}
-                    </div>
+                    {data.profilePhoto.type === 'url' ? (
+                      <img
+                        src={data.profilePhoto.value}
+                        alt={data.displayName}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-xl">
+                        {data.profilePhoto.type === 'placeholder'
+                          ? data.profilePhoto.value
+                          : data.displayName.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-foreground truncate">{data.displayName}</p>
                       <p className="text-sm text-muted-foreground truncate">@{profile.username}</p>

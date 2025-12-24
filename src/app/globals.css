@@ -36,25 +36,25 @@
 }
 
 .dark {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-  --card: #1e293b;
-  --card-foreground: #f1f5f9;
-  --card-border: #334155;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --accent: #334155;
-  --accent-foreground: #f1f5f9;
-  --border: #334155;
-  --input: #1e293b;
-  --input-border: #475569;
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #171717;
+  --card-foreground: #fafafa;
+  --card-border: #262626;
+  --muted: #171717;
+  --muted-foreground: #a3a3a3;
+  --accent: #262626;
+  --accent-foreground: #fafafa;
+  --border: #262626;
+  --input: #171717;
+  --input-border: #404040;
   --primary: #667eea;
   --primary-foreground: #ffffff;
   --secondary: #f5576c;
   --secondary-foreground: #ffffff;
 
   /* Glassmorphism - dark mode */
-  --glass-bg: rgba(15, 23, 42, 0.7);
+  --glass-bg: rgba(23, 23, 23, 0.7);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: rgba(0, 0, 0, 0.5);
 
@@ -71,10 +71,6 @@
 
 html,
 body {
-  height: 100%;
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
   font-family: Arial, Helvetica, sans-serif;
   background-color: var(--background);
   color: var(--foreground);
@@ -105,4 +101,32 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.bg-gradient-primary {
+  background: var(--gradient-primary);
+}
+
+.bg-gradient-secondary {
+  background: var(--gradient-secondary);
+}
+
+.bg-gradient-accent {
+  background: var(--gradient-accent);
+}
+
+.bg-gradient-warm {
+  background: var(--gradient-warm);
+}
+
+.shadow-glow-purple {
+  box-shadow: var(--glow-purple);
+}
+
+.shadow-glow-pink {
+  box-shadow: var(--glow-pink);
+}
+
+.shadow-glow-blue {
+  box-shadow: var(--glow-blue);
 }

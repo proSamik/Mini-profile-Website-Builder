@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,11 @@ export function SignupForm({ username }: SignupFormProps) {
     password: '',
     confirmPassword: '',
   });
+
+  // Sync username prop with form state
+  useEffect(() => {
+    setFormData((prev) => ({ ...prev, username }));
+  }, [username]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

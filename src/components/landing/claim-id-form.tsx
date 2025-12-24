@@ -19,6 +19,9 @@ export function ClaimIdForm() {
       return;
     }
 
+    // Reset form visibility while checking new username
+    setShowForm(false);
+
     const timeout = setTimeout(async () => {
       setChecking(true);
       try {
