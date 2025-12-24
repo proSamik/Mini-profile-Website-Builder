@@ -13,6 +13,7 @@ interface JSONEditorProps {
 export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
   const [jsonText, setJsonText] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [errorLine, setErrorLine] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
   const [isManualEdit, setIsManualEdit] = useState(false);
 
@@ -32,9 +33,19 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
         const parsed = JSON.parse(jsonText);
         onChange(parsed);
         setError(null);
-      } catch (err) {
-        // Don't show error while typing, only set it
-        setError('Invalid JSON format');
+        setErrorLine(null);
+      } catch (err: unknown) {
+        // Extract line number from error message
+        const match = (err as Error).message.match(/at position (\d+)/);
+        if (match) {
+          const position = parseInt(match[1]);
+          const lineNumber = jsonText.substring(0, position).split('\n').length;
+          setErrorLine(lineNumber);
+          setError(`Invalid JSON at line ${lineNumber}: ${(err as Error).message}`);
+        } else {
+          setError(`Invalid JSON: ${(err as Error).message}`);
+          setErrorLine(null);
+        }
       }
     }, 500); // Debounce by 500ms
 
@@ -45,6 +56,7 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
     setJsonText(e.target.value);
     setIsManualEdit(true);
     setError(null);
+    setErrorLine(null);
   };
 
   const handleLoad = () => {
@@ -52,9 +64,20 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
       const parsed = JSON.parse(jsonText);
       onChange(parsed);
       setError(null);
+      setErrorLine(null);
       setIsManualEdit(false);
-    } catch (err) {
-      setError('Invalid JSON format');
+    } catch (err: unknown) {
+      // Extract line number from error message
+      const match = (err as Error).message.match(/at position (\d+)/);
+      if (match) {
+        const position = parseInt(match[1]);
+        const lineNumber = jsonText.substring(0, position).split('\n').length;
+        setErrorLine(lineNumber);
+        setError(`Invalid JSON at line ${lineNumber}: ${(err as Error).message}`);
+      } else {
+        setError(`Invalid JSON: ${(err as Error).message}`);
+        setErrorLine(null);
+      }
     }
   };
 
@@ -98,18 +121,30 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <textarea
-          value={jsonText}
-          onChange={handleTextChange}
-          className="w-full h-[400px] p-3 font-mono text-sm border border-input-border rounded-lg bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          spellCheck={false}
-          placeholder="Edit JSON to see live preview..."
-        />
+        <div className="relative">
+          <textarea
+            value={jsonText}
+            onChange={handleTextChange}
+            className={`w-full h-[400px] p-3 font-mono text-sm border rounded-lg bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-ring ${
+              error ? 'border-red-500' : 'border-input-border'
+            }`}
+            spellCheck={false}
+            placeholder="Edit JSON to see live preview..."
+          />
+        </div>
 
         {error && (
-          <div className="flex items-center gap-2 text-red-500 text-sm mt-2">
-            <AlertCircle className="w-4 h-4" />
-            {error}
+          <div className="flex items-start gap-2 text-red-500 text-sm mt-2 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-900">
+            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            <div>
+              <div className="font-semibold">JSON Syntax Error</div>
+              <div className="mt-1">{error}</div>
+              {errorLine && (
+                <div className="mt-2 text-xs">
+                  Check line <span className="font-bold">{errorLine}</span> in the editor above
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -128,6 +163,7 @@ export function JSONEditor({ profileData, onChange }: JSONEditorProps) {
               setJsonText(JSON.stringify(profileData, null, 2));
               setIsManualEdit(false);
               setError(null);
+              setErrorLine(null);
             }}
             variant="outline"
           >
