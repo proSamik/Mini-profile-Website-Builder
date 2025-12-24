@@ -42,16 +42,15 @@ export function ClaimIdForm() {
   }, [username]);
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-6">
+    <div className="w-full space-y-6">
       <div className="relative">
         <Input
-          label="Claim Your Username"
           value={username}
           onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
           placeholder="yourname"
           className="pr-10"
         />
-        <div className="absolute right-3 top-[44px]">
+        <div className="absolute right-3 top-[12px]">
           {checking && <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />}
           {!checking && available === true && <CheckCircle2 className="w-5 h-5 text-green-500" />}
           {!checking && available === false && <XCircle className="w-5 h-5 text-red-500" />}
