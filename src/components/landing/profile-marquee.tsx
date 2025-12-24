@@ -21,13 +21,14 @@ export function ProfileMarquee() {
   const displayProfiles = profiles.length >= 3 ? [...profiles, ...profiles] : profiles;
 
   return (
-    <section className="pt-6 pb-12 overflow-hidden">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-foreground">Recently Created Profiles</h2>
-        <p className="text-muted-foreground mt-2">Join our growing community</p>
-      </div>
+    <section className="pt-6 pb-12 px-4 overflow-hidden">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-foreground">Recently Created Profiles</h2>
+          <p className="text-muted-foreground mt-2">Join our growing community</p>
+        </div>
 
-      <div className="relative">
+        <div className="relative">
         <div className="flex gap-6 animate-marquee">
           {displayProfiles.map((profile, idx) => {
             const data = profile.profileData as ProfileData;
@@ -65,16 +66,17 @@ export function ProfileMarquee() {
             );
           })}
         </div>
-      </div>
+        </div>
 
-      <div className="text-center mt-8">
-        <Link
-          href="/profiles"
-          className="text-primary hover:text-primary/80 font-semibold inline-flex items-center gap-2 hover:gap-3 transition-all"
-        >
-          View all profiles
-          <span>→</span>
-        </Link>
+        <div className="text-center mt-8">
+          <Link
+            href="/profiles"
+            className="text-primary hover:text-primary/80 font-semibold inline-flex items-center gap-2 hover:gap-3 transition-all"
+          >
+            View all profiles
+            <span>→</span>
+          </Link>
+        </div>
       </div>
     </section>
   );
