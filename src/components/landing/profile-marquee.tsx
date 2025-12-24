@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Profile } from '@/lib/db/schema';
 import { ProfileData } from '@/types/profile';
+import { Marquee } from '@/components/ui/marquee';
 
 export function ProfileMarquee() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -17,9 +18,40 @@ export function ProfileMarquee() {
 
   if (profiles.length === 0) return null;
 
-  // Duplicate profiles for seamless infinite scroll only if we have enough profiles
-  const shouldAnimate = profiles.length >= 3;
-  const displayProfiles = shouldAnimate ? [...profiles, ...profiles] : profiles;
+  const ProfileCard = ({ profile }: { profile: Profile }) => {
+    const data = profile.profileData as ProfileData;
+    return (
+      <Link
+        href={`/${profile.username}`}
+        className="flex-shrink-0 w-64"
+      >
+        <div className="glass-card rounded-2xl p-6 hover:shadow-glow-purple hover:scale-105 transition-all duration-300">
+          <div className="flex items-center gap-4">
+            {data.profilePhoto.type === 'url' ? (
+              <img
+                src={data.profilePhoto.value}
+                alt={data.displayName}
+                className="w-12 h-12 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-xl">
+                {data.profilePhoto.type === 'placeholder'
+                  ? data.profilePhoto.value
+                  : data.displayName.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-foreground truncate">{data.displayName}</p>
+              <p className="text-sm text-muted-foreground truncate">@{profile.username}</p>
+            </div>
+          </div>
+          {data.bio && (
+            <p className="mt-3 text-sm text-muted-foreground line-clamp-2">{data.bio}</p>
+          )}
+        </div>
+      </Link>
+    );
+  };
 
   return (
     <section className="pt-6 pb-12 px-4 overflow-hidden">
@@ -30,43 +62,15 @@ export function ProfileMarquee() {
         </div>
 
         <div className="relative">
-        <div className={`flex gap-6 ${shouldAnimate ? 'animate-marquee' : 'justify-center'}`}>
-          {displayProfiles.map((profile, idx) => {
-            const data = profile.profileData as ProfileData;
-            return (
-              <Link
-                key={`${profile.id}-${idx}`}
-                href={`/${profile.username}`}
-                className="flex-shrink-0 w-64"
-              >
-                <div className="glass-card rounded-2xl p-6 hover:shadow-glow-purple hover:scale-105 transition-all duration-300">
-                  <div className="flex items-center gap-4">
-                    {data.profilePhoto.type === 'url' ? (
-                      <img
-                        src={data.profilePhoto.value}
-                        alt={data.displayName}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold text-xl">
-                        {data.profilePhoto.type === 'placeholder'
-                          ? data.profilePhoto.value
-                          : data.displayName.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-foreground truncate">{data.displayName}</p>
-                      <p className="text-sm text-muted-foreground truncate">@{profile.username}</p>
-                    </div>
-                  </div>
-                  {data.bio && (
-                    <p className="mt-3 text-sm text-muted-foreground line-clamp-2">{data.bio}</p>
-                  )}
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+          <Marquee pauseOnHover className="[--duration:30s]">
+            {profiles.map((profile) => (
+              <ProfileCard key={profile.id} profile={profile} />
+            ))}
+          </Marquee>
+
+          {/* Gradient overlays for fade effect */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background"></div>
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-background"></div>
         </div>
 
         <div className="text-center mt-8">
