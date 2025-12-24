@@ -16,7 +16,7 @@ export const LinksSection = memo(function LinksSection({ links }: LinksSectionPr
   const sortedLinks = [...links].sort((a, b) => a.displayOrder - b.displayOrder);
 
   return (
-    <div className="p-8 border-b border-border">
+    <div className="p-8 border-b themed-border">
       <div className="flex flex-wrap gap-3 justify-center">
         {sortedLinks.map((link) => (
           <a
@@ -25,7 +25,7 @@ export const LinksSection = memo(function LinksSection({ links }: LinksSectionPr
             target="_blank"
             rel="noopener noreferrer"
             title={link.label}
-            className="group inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium bg-white text-foreground border-2 border-transparent transition-all hover:border-border hover:shadow-lg hover:scale-105"
+            className="themed-link group inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all hover:shadow-lg"
           >
             {link.favicon ? (
               <Image

@@ -62,24 +62,24 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
 
   // Default Layout (original vertical centered layout)
   const DefaultLayout = () => (
-    <div className="p-8 text-center border-b border-border">
+    <div className="p-8 text-center border-b themed-border">
       {/* Profile Photo */}
       <div className="mb-6 flex justify-center">
         <ProfilePhoto size="large" />
       </div>
 
       {/* Display Name */}
-      <h1 className="text-3xl font-bold text-foreground mb-1">
+      <h1 className="text-3xl font-bold mb-1">
         {profileData.displayName}
       </h1>
 
       {/* Username */}
-      <p className="text-muted-foreground mb-4">
+      <p className="opacity-70 mb-4">
         @{profileData.username}
       </p>
 
       {/* Bio */}
-      <p className="text-foreground/80 max-w-md mx-auto leading-relaxed">
+      <p className="opacity-80 max-w-md mx-auto leading-relaxed">
         {profileData.bio}
       </p>
     </div>
@@ -87,27 +87,27 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
 
   // Layout 1: Photo + Username (col1) | Display Name + Bio (col2)
   const Layout1 = () => (
-    <div className="p-8 border-b border-border">
+    <div className="p-8 border-b themed-border">
       <div className="flex gap-6 items-start">
         {/* Column 1: Photo + Username */}
         <div className="flex flex-col items-center gap-3">
           <ProfilePhoto size="large" />
-          <div className="bg-muted rounded-lg px-4 py-2">
-            <p className="text-sm text-muted-foreground whitespace-nowrap">
+          <div className="themed-card rounded-lg px-4 py-2">
+            <p className="text-sm whitespace-nowrap">
               @{profileData.username}
             </p>
           </div>
         </div>
 
         {/* Column 2: Display Name + Bio */}
-        <div className="flex-1 bg-muted rounded-lg">
-          <div className="p-4 border-b border-border/30">
-            <h1 className="text-2xl font-bold text-foreground">
+        <div className="flex-1 themed-card rounded-lg">
+          <div className="p-4 border-b themed-border/30">
+            <h1 className="text-2xl font-bold">
               {profileData.displayName}
             </h1>
           </div>
           <div className="p-4">
-            <p className="text-foreground/80 leading-relaxed">
+            <p className="leading-relaxed opacity-80">
               {profileData.bio}
             </p>
           </div>
@@ -118,17 +118,17 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
 
   // Layout 2: Display Name + Bio (col1) | Photo + Username (col2)
   const Layout2 = () => (
-    <div className="p-8 border-b border-border">
+    <div className="p-8 border-b themed-border">
       <div className="flex gap-6 items-start">
         {/* Column 1: Display Name + Bio */}
-        <div className="flex-1 bg-muted rounded-lg">
-          <div className="p-4 border-b border-border/30">
-            <h1 className="text-2xl font-bold text-foreground">
+        <div className="flex-1 themed-card rounded-lg">
+          <div className="p-4 border-b themed-border/30">
+            <h1 className="text-2xl font-bold">
               {profileData.displayName}
             </h1>
           </div>
           <div className="p-4">
-            <p className="text-foreground/80 leading-relaxed">
+            <p className="leading-relaxed opacity-80">
               {profileData.bio}
             </p>
           </div>
@@ -137,8 +137,8 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
         {/* Column 2: Photo + Username */}
         <div className="flex flex-col items-center gap-3">
           <ProfilePhoto size="large" />
-          <div className="bg-muted rounded-lg px-4 py-2">
-            <p className="text-sm text-muted-foreground whitespace-nowrap">
+          <div className="themed-card rounded-lg px-4 py-2">
+            <p className="text-sm whitespace-nowrap">
               @{profileData.username}
             </p>
           </div>
@@ -149,7 +149,7 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
 
   // Layout 3: Photo (col1) | Display Name + Username (col2, 2 rows) | Bio/Links/Highlights centered
   const Layout3 = () => (
-    <div className="p-8 border-b border-border">
+    <div className="p-8 border-b themed-border">
       <div className="flex gap-6 items-start mb-6">
         {/* Column 1: Photo */}
         <div className="flex justify-center">
@@ -157,14 +157,14 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
         </div>
 
         {/* Column 2: Display Name + Username (split into 2 rows) */}
-        <div className="flex-1 bg-muted rounded-lg">
-          <div className="p-4 border-b border-border/30">
-            <h1 className="text-2xl font-bold text-foreground">
+        <div className="flex-1 themed-card rounded-lg">
+          <div className="p-4 border-b themed-border/30">
+            <h1 className="text-2xl font-bold">
               {profileData.displayName}
             </h1>
           </div>
           <div className="px-4 py-2">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm opacity-80">
               @{profileData.username}
             </p>
           </div>
@@ -173,7 +173,7 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
 
       {/* Bio centered */}
       <div className="max-w-md mx-auto">
-        <p className="text-foreground/80 leading-relaxed text-center">
+        <p className="leading-relaxed text-center opacity-80">
           {profileData.bio}
         </p>
       </div>
@@ -183,29 +183,29 @@ export const ProfileCard = memo(function ProfileCard({ profileData }: ProfileCar
   // Layout 4: Photo + Username stacked (col1) | Display Name + Bio (col2)
   // Note: Highlights and Links order will be handled by parent component
   const Layout4 = () => (
-    <div className="p-8 border-b border-border">
+    <div className="p-8 border-b themed-border">
       <div className="flex gap-6 items-start">
         {/* Column 1: Photo + Username (stacked in separate rows) */}
         <div className="flex flex-col gap-3">
           <div className="flex justify-center">
             <ProfilePhoto size="large" />
           </div>
-          <div className="bg-muted rounded-lg px-4 py-2 text-center">
-            <p className="text-sm text-muted-foreground">
+          <div className="themed-card rounded-lg px-4 py-2 text-center">
+            <p className="text-sm opacity-80">
               @{profileData.username}
             </p>
           </div>
         </div>
 
         {/* Column 2: Display Name + Bio */}
-        <div className="flex-1 bg-muted rounded-lg">
-          <div className="p-4 border-b border-border/30">
-            <h1 className="text-2xl font-bold text-foreground">
+        <div className="flex-1 themed-card rounded-lg">
+          <div className="p-4 border-b themed-border/30">
+            <h1 className="text-2xl font-bold">
               {profileData.displayName}
             </h1>
           </div>
           <div className="p-4">
-            <p className="text-foreground/80 leading-relaxed">
+            <p className="leading-relaxed opacity-80">
               {profileData.bio}
             </p>
           </div>

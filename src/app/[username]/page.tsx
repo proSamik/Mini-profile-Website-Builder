@@ -4,6 +4,7 @@ import { ProfileCard } from '@/components/preview/profile-card';
 import { LinksSection } from '@/components/preview/links-section';
 import { HighlightsGrid } from '@/components/preview/highlights-grid';
 import { EditButton } from '@/components/profile/edit-button';
+import { ThemedProfileWrapper } from '@/components/theme/themed-profile-wrapper';
 import { ProfileData } from '@/types/profile';
 
 interface PageProps {
@@ -25,7 +26,7 @@ export default async function ProfilePage({ params }: PageProps) {
   const layout = profileData.layout || 'default';
 
   return (
-    <div className="min-h-screen bg-background">
+    <ThemedProfileWrapper theme={profileData.theme} className="min-h-screen">
       <EditButton username={username} />
       <div className="max-w-4xl mx-auto">
         <ProfileCard profileData={profileData} />
@@ -42,7 +43,7 @@ export default async function ProfilePage({ params }: PageProps) {
           </>
         )}
       </div>
-    </div>
+    </ThemedProfileWrapper>
   );
 }
 

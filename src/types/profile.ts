@@ -24,6 +24,11 @@ export interface Highlight {
 
 export type ProfileLayout = 'default' | 'layout1' | 'layout2' | 'layout3' | 'layout4';
 
+export interface ProfileTheme {
+  packId: string;
+  mode: 'light' | 'dark' | 'auto';
+}
+
 export interface ProfileData {
   username: string;
   displayName: string;
@@ -32,6 +37,7 @@ export interface ProfileData {
   links: Link[];
   highlights: Highlight[];
   layout?: ProfileLayout; // Profile layout preference (defaults to 'default')
+  theme?: ProfileTheme; // Theme preference (defaults to default theme)
 }
 
 export interface ProfileResponse {

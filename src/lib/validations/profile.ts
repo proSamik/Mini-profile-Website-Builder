@@ -24,6 +24,11 @@ export const HighlightSchema = z.object({
   category: z.string().optional(),
 });
 
+export const ProfileThemeSchema = z.object({
+  packId: z.string(),
+  mode: z.enum(['light', 'dark', 'auto']),
+});
+
 export const ProfileDataSchema = z.object({
   username: z
     .string()
@@ -36,6 +41,7 @@ export const ProfileDataSchema = z.object({
   links: z.array(LinkSchema),
   highlights: z.array(HighlightSchema),
   layout: z.enum(['default', 'layout1', 'layout2', 'layout3', 'layout4']).optional(),
+  theme: ProfileThemeSchema.optional(),
 });
 
 export const CreateProfileSchema = z.object({

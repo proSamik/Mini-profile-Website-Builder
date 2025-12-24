@@ -6,6 +6,7 @@ import { ProfileInfoCard } from './profile-info-card';
 import { LinksManager } from './links-manager';
 import { HighlightsManager } from './highlights-manager';
 import { LayoutSelector } from './layout-selector';
+import { ThemeSelector } from './theme-selector';
 
 interface UIEditorProps {
   profileData: ProfileData;
@@ -25,7 +26,10 @@ export function UIEditor({ profileData, onChange, userId, onUsernameValidChange 
       />
       <LinksManager profileData={profileData} onChange={onChange} />
       <HighlightsManager profileData={profileData} onChange={onChange} userId={userId} />
-      <LayoutSelector profileData={profileData} onChange={onChange} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LayoutSelector profileData={profileData} onChange={onChange} />
+        <ThemeSelector profileData={profileData} onChange={onChange} />
+      </div>
     </div>
   );
 }

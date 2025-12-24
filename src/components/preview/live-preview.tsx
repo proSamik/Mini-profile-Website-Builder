@@ -7,6 +7,7 @@ import { LinksSection } from './links-section';
 import { HighlightsGrid } from './highlights-grid';
 import { Button, Iphone } from '@/components/ui';
 import { Monitor, Smartphone, ExternalLink } from 'lucide-react';
+import { ThemedProfileWrapper } from '@/components/theme/themed-profile-wrapper';
 
 interface LivePreviewProps {
   profileData: ProfileData;
@@ -62,43 +63,45 @@ export function LivePreview({ profileData }: LivePreviewProps) {
         </div>
       </div>
 
-      {viewMode === 'mobile' ? (
-        /* Mobile view with iPhone bezel */
-        <div className="flex justify-center">
-          <Iphone>
+      <ThemedProfileWrapper theme={profileData.theme} className="min-h-full">
+        {viewMode === 'mobile' ? (
+          /* Mobile view with iPhone bezel */
+          <div className="flex justify-center">
+            <Iphone>
+              <ProfileCard profileData={profileData} />
+              {/* Layout 4 renders highlights before links */}
+              {layout === 'layout4' ? (
+                <>
+                  <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={true} />
+                  <LinksSection links={profileData.links} />
+                </>
+              ) : (
+                <>
+                  <LinksSection links={profileData.links} />
+                  <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={true} />
+                </>
+              )}
+            </Iphone>
+          </div>
+        ) : (
+          /* Desktop view */
+          <div className={containerClassName}>
             <ProfileCard profileData={profileData} />
             {/* Layout 4 renders highlights before links */}
             {layout === 'layout4' ? (
               <>
-                <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={true} />
+                <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={false} />
                 <LinksSection links={profileData.links} />
               </>
             ) : (
               <>
                 <LinksSection links={profileData.links} />
-                <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={true} />
+                <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={false} />
               </>
             )}
-          </Iphone>
-        </div>
-      ) : (
-        /* Desktop view */
-        <div className={containerClassName}>
-          <ProfileCard profileData={profileData} />
-          {/* Layout 4 renders highlights before links */}
-          {layout === 'layout4' ? (
-            <>
-              <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={false} />
-              <LinksSection links={profileData.links} />
-            </>
-          ) : (
-            <>
-              <LinksSection links={profileData.links} />
-              <HighlightsGrid highlights={profileData.highlights} forceSingleColumn={false} />
-            </>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </ThemedProfileWrapper>
     </div>
   );
 }
