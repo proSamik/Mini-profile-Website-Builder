@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useProfile } from '@/hooks/use-profile';
 import { UIEditor } from '@/components/editor/ui-editor';
 import { JSONEditor } from '@/components/editor/json-editor';
@@ -45,9 +46,11 @@ export function EditorClient({ userId }: EditorClientProps) {
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-card-foreground">
-                Mini Profile Builder
-              </h1>
+              <Link href="/">
+                <h1 className="text-2xl font-bold text-card-foreground hover:text-primary transition-colors cursor-pointer">
+                  Builder
+                </h1>
+              </Link>
               <p className="text-sm text-muted-foreground">
                 Design your personal profile website in real-time
               </p>
