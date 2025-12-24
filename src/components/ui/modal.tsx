@@ -9,7 +9,7 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
 export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
@@ -37,6 +37,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
     sm: 'max-w-md',
     md: 'max-w-2xl',
     lg: 'max-w-4xl',
+    xl: 'max-w-5xl',
   };
 
   return (
@@ -57,7 +58,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
         style={{ backgroundColor: 'var(--card)' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border" style={{ backgroundColor: 'var(--card)' }}>
+        <div className="flex items-center justify-between p-4 border-b border-border" style={{ backgroundColor: 'var(--card)' }}>
           <h2 className="text-xl font-bold text-foreground">{title}</h2>
           <button
             onClick={onClose}
@@ -68,7 +69,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
         </div>
 
         {/* Content */}
-        <div className="p-6" style={{ backgroundColor: 'var(--card)' }}>{children}</div>
+        <div className="p-4" style={{ backgroundColor: 'var(--card)' }}>{children}</div>
       </div>
     </div>
   );

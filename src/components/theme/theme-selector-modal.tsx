@@ -42,10 +42,10 @@ export function ThemeSelectorModal({
       title="Choose Theme Pack"
       size="xl"
     >
-      <div className="space-y-6">
+      <div className="space-y-3">
         {/* Light/Dark Mode Toggle */}
-        <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-          <span className="font-medium text-foreground">Preview Mode</span>
+        <div className="flex items-center justify-between py-2 px-3 bg-muted rounded-lg">
+          <span className="font-medium text-sm text-foreground">Preview Mode</span>
           <div className="flex gap-2">
             <Button
               size="sm"
@@ -67,7 +67,7 @@ export function ThemeSelectorModal({
         </div>
 
         {/* Theme Packs Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto">
           {themePacks.map((pack) => (
             <ThemePackCard
               key={pack.id}
@@ -80,7 +80,7 @@ export function ThemeSelectorModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-border">
+        <div className="flex justify-end gap-3 pt-3 border-t border-border">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>

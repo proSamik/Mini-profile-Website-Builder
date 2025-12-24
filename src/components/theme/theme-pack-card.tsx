@@ -23,30 +23,30 @@ export function ThemePackCard({ pack, mode, isSelected, onClick }: ThemePackCard
     >
       {/* Gradient Preview Banner */}
       <div
-        className="h-24 w-full"
+        className="h-16 w-full"
         style={{ background: pack.preview.thumbnail }}
       />
 
       {/* Theme Preview Content */}
       <div
-        className="p-4 border-2 border-t-0 border-border"
+        className="p-3 border-2 border-t-0 border-border"
         style={{ backgroundColor: colors.background }}
       >
-        <h3 className="font-bold text-foreground mb-1">{pack.name}</h3>
-        <p className="text-sm text-muted-foreground mb-3">{pack.description}</p>
+        <h3 className="font-bold text-sm text-foreground mb-0.5">{pack.name}</h3>
+        <p className="text-xs text-muted-foreground mb-2">{pack.description}</p>
 
         {/* Mini Preview Elements */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {/* Card preview */}
           <div
-            className="h-8 rounded-lg"
+            className="h-6 rounded-lg"
             style={{ backgroundColor: colors.cardBackground }}
           />
 
           {/* Button preview with gradient */}
           {colors.gradient && (
             <div
-              className="h-8 rounded-lg"
+              className="h-6 rounded-lg"
               style={{
                 background: colors.gradient.via
                   ? `linear-gradient(to right, ${colors.gradient.from}, ${colors.gradient.via}, ${colors.gradient.to})`
@@ -57,7 +57,7 @@ export function ThemePackCard({ pack, mode, isSelected, onClick }: ThemePackCard
         </div>
 
         {isSelected && (
-          <div className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs font-medium">
+          <div className="absolute top-1.5 right-1.5 bg-primary text-primary-foreground px-1.5 py-0.5 rounded text-xs font-medium">
             Selected
           </div>
         )}
